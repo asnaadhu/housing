@@ -1,0 +1,191 @@
+{
+  "entities": {
+    "building": {
+      "title": "Building",
+      "description": "Property building structure",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Building ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Building Name" },
+        "code": { "type": "string", "maxLength": 30, "description": "Building Code" },
+        "description": { "type": "string", "maxLength": 500, "description": "Optional description" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "name", "code"]
+    },
+    "floor": {
+      "title": "Floor",
+      "description": "Building floor level",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Floor ID" },
+        "buildingId": { "type": "string", "description": "Parent building ID" },
+        "number": { "type": "number", "description": "Floor level number" },
+        "label": { "type": "string", "maxLength": 100, "description": "Floor label" },
+        "description": { "type": "string", "maxLength": 500, "description": "Optional description" }
+      },
+      "required": ["id", "buildingId", "number", "label"]
+    },
+    "roomType": {
+      "title": "RoomType",
+      "description": "Category for room layouts and defaults",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Room type ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Type name" },
+        "defaultBedCount": { "type": "number", "description": "Default beds count" },
+        "description": { "type": "string", "maxLength": 500, "description": "Optional description" },
+        "badgeColor": { "type": "string", "maxLength": 50, "description": "Badge color token or hex" }
+      },
+      "required": ["id", "name", "defaultBedCount"]
+    },
+    "statusCategory": {
+      "title": "StatusCategory",
+      "description": "Occupancy or operational state category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Status ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Status name" },
+        "type": { "type": "string", "enum": ["room", "bed", "both"], "description": "Status application scope" },
+        "color": { "type": "string", "maxLength": 50, "description": "Status color" },
+        "description": { "type": "string", "maxLength": 500, "description": "Optional description" },
+        "isOccupiedState": { "type": "boolean" },
+        "isMaintenanceState": { "type": "boolean" }
+      },
+      "required": ["id", "name", "type", "color"]
+    },
+    "room": {
+      "title": "Room",
+      "description": "Individual accommodation unit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Room ID" },
+        "buildingId": { "type": "string", "description": "Building ID" },
+        "floorId": { "type": "string", "description": "Floor ID" },
+        "roomNumber": { "type": "string", "maxLength": 30, "description": "Room number" },
+        "roomTypeId": { "type": "string", "description": "Room type ID" },
+        "totalBeds": { "type": "number", "description": "Bed slot count" },
+        "statusId": { "type": "string", "description": "Status category ID" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Notes" },
+        "lastCleaned": { "type": "string", "description": "Cleaning date" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "buildingId", "floorId", "roomNumber", "roomTypeId", "totalBeds", "statusId"]
+    },
+    "bed": {
+      "title": "Bed",
+      "description": "Specific bed slot within a room",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Bed ID" },
+        "roomId": { "type": "string", "description": "Parent room ID" },
+        "bedNumber": { "type": "number", "description": "Bed slot sequence number" },
+        "label": { "type": "string", "maxLength": 100, "description": "Bed display label" },
+        "statusId": { "type": "string", "description": "Status category ID" },
+        "assignedTo": { "type": "object", "description": "Bed assignment details" },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Notes" }
+      },
+      "required": ["id", "roomId", "bedNumber", "label", "statusId"]
+    },
+    "activityLog": {
+      "title": "ActivityLog",
+      "description": "System event or audit log entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log entry ID" },
+        "timestamp": { "type": "string", "description": "ISO timestamp" },
+        "action": { "type": "string", "maxLength": 50, "description": "Log action key" },
+        "title": { "type": "string", "maxLength": 200, "description": "Short log title" },
+        "details": { "type": "string", "maxLength": 1000, "description": "Log details" },
+        "actor": { "type": "string", "maxLength": 100, "description": "User or system actor" }
+      },
+      "required": ["id", "timestamp", "action", "title", "details"]
+    },
+    "userProfile": {
+      "title": "UserProfile",
+      "description": "Registered system user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "User ID" },
+        "email": { "type": "string", "maxLength": 150, "description": "Email address" },
+        "name": { "type": "string", "maxLength": 100, "description": "Full name" },
+        "role": { "type": "string", "enum": ["Admin", "Property Manager", "Staff", "Tenant"], "description": "Access role" },
+        "employeeId": { "type": "string", "maxLength": 50, "description": "Employee ID" },
+        "department": { "type": "string", "maxLength": 100, "description": "Department name" },
+        "assignedBuildingIds": { "type": "array", "description": "Managed building IDs" },
+        "assignedBedId": { "type": "string", "description": "Assigned bed ID for tenants" },
+        "phone": { "type": "string", "maxLength": 30, "description": "Phone number" },
+        "avatarUrl": { "type": "string", "maxLength": 500, "description": "Avatar photo URL" },
+        "createdAt": { "type": "string", "description": "Creation ISO date" }
+      },
+      "required": ["id", "email", "name", "role"]
+    },
+    "maintenanceRequest": {
+      "title": "MaintenanceRequest",
+      "description": "Property maintenance service request ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Ticket ID" },
+        "title": { "type": "string", "maxLength": 200, "description": "Short request title" },
+        "description": { "type": "string", "maxLength": 2000, "description": "Issue details" },
+        "category": { "type": "string", "maxLength": 50, "description": "Maintenance category" },
+        "urgency": { "type": "string", "enum": ["Low", "Medium", "High", "Urgent"], "description": "Urgency level" },
+        "status": { "type": "string", "enum": ["New", "In Progress", "Pending Parts", "Completed", "Cancelled"], "description": "Work order status" },
+        "buildingId": { "type": "string", "description": "Building ID" },
+        "floorId": { "type": "string", "description": "Floor ID" },
+        "roomId": { "type": "string", "description": "Room ID" },
+        "bedId": { "type": "string", "description": "Optional bed ID" },
+        "requesterId": { "type": "string", "description": "Requester user ID" },
+        "requesterName": { "type": "string", "maxLength": 100, "description": "Requester name" },
+        "requesterRole": { "type": "string", "description": "Requester role" },
+        "contactPhone": { "type": "string", "maxLength": 30, "description": "Contact phone" },
+        "assignedTechnician": { "type": "string", "maxLength": 100, "description": "Assigned tech" },
+        "assignedTechnicianPhone": { "type": "string", "maxLength": 30, "description": "Tech phone" },
+        "createdAt": { "type": "string", "description": "Created date" },
+        "updatedAt": { "type": "string", "description": "Updated date" },
+        "completedAt": { "type": "string", "description": "Completion date" },
+        "resolutionNotes": { "type": "string", "maxLength": 1000, "description": "Resolution summary" },
+        "updateRoomBedStatusOnComplete": { "type": "boolean" }
+      },
+      "required": ["id", "title", "description", "category", "urgency", "status", "buildingId", "floorId", "roomId", "requesterId", "requesterName", "requesterRole", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/buildings/{buildingId}": {
+      "schema": { "$ref": "#/entities/building" },
+      "description": "Property buildings list"
+    },
+    "/floors/{floorId}": {
+      "schema": { "$ref": "#/entities/floor" },
+      "description": "Building floors list"
+    },
+    "/roomTypes/{roomTypeId}": {
+      "schema": { "$ref": "#/entities/roomType" },
+      "description": "Room categories"
+    },
+    "/statuses/{statusCategoryId}": {
+      "schema": { "$ref": "#/entities/statusCategory" },
+      "description": "Room/Bed status categories"
+    },
+    "/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/room" },
+      "description": "Rooms collection"
+    },
+    "/beds/{bedId}": {
+      "schema": { "$ref": "#/entities/bed" },
+      "description": "Beds collection"
+    },
+    "/logs/{logId}": {
+      "schema": { "$ref": "#/entities/activityLog" },
+      "description": "Activity audit logs"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/userProfile" },
+      "description": "User profiles directory"
+    },
+    "/maintenanceRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/maintenanceRequest" },
+      "description": "Maintenance tickets"
+    }
+  }
+}

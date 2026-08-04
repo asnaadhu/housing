@@ -1,0 +1,359 @@
+import React from 'react';
+import { useProperty } from '../context/PropertyContext';
+import {
+  Building2,
+  AlertTriangle,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  Layers,
+  PlusCircle,
+  UserPlus,
+} from 'lucide-react';
+
+export const DashboardView: React.FC = () => {
+  const { data, setActiveTab } = useProperty();
+
+  const totalBeds = data.beds.length;
+  const occupiedBeds = data.beds.filter((b) => b.assignedTo != null).length;
+
+  const maintenanceBeds = data.beds.filter((b) => {
+    const s = data.statuses.find((st) => st.id === b.statusId);
+    return s?.isMaintenanceState === true;
+  }).length;
+
+  const reservedBeds = data.beds.filter((b) => {
+    const s = data.statuses.find((st) => st.id === b.statusId);
+    return s?.name.toLowerCase() === 'reserved';
+  }).length;
+
+  const availableBeds = totalBeds - occupiedBeds - maintenanceBeds;
+
+  const occupancyPercentage = totalBeds > 0 ? (occupiedBeds / totalBeds) * 100 : 0;
+  const occupancyFormatted = occupancyPercentage.toFixed(1);
+
+  // Breakdown by Room Category
+  const categoryBreakdown = data.roomTypes.map((type) => {
+    const roomsOfType = data.rooms.filter((r) => r.roomTypeId === type.id);
+    const roomIds = roomsOfType.map((r) => r.id);
+    const bedsOfType = data.beds.filter((b) => roomIds.includes(b.roomId));
+    const occupied = bedsOfType.filter((b) => b.assignedTo != null).length;
+    const total = bedsOfType.length;
+    const available = total - occupied;
+    const pct = total > 0 ? Math.round((occupied / total) * 100) : 0;
+
+    return {
+      type,
+      totalRooms: roomsOfType.length,
+      totalBeds: total,
+      occupiedBeds: occupied,
+      availableBeds: available,
+      percentage: pct,
+    };
+  });
+
+  // Maintenance Alerts
+  const maintenanceRooms = data.rooms.filter((r) => {
+    const s = data.statuses.find((st) => st.id === r.statusId);
+    return s?.isMaintenanceState === true || r.statusId === 'status-maintenance';
+  });
+
+  const maintenanceBedList = data.beds.filter((b) => {
+    const s = data.statuses.find((st) => st.id === b.statusId);
+    return s?.isMaintenanceState === true || b.statusId === 'status-maintenance';
+  });
+
+  return (
+    <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Metric 1: Occupancy Rate */}
+        <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+              Occupancy Rate
+            </div>
+            <div className="text-4xl font-bold leading-none text-[#1A1A1A]">
+              {occupancyFormatted}<span className="text-lg ml-1 font-sans">%</span>
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="h-1 w-full bg-[#F0F0EE]">
+              <div
+                className="h-full bg-[#1A1A1A] transition-all duration-500"
+                style={{ width: `${occupancyPercentage}%` }}
+              />
+            </div>
+            <div className="text-[10px] mt-2 text-[#666662] uppercase tracking-wider font-semibold">
+              {occupiedBeds} occupied / {totalBeds} total beds
+            </div>
+          </div>
+        </div>
+
+        {/* Metric 2: Available Beds */}
+        <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+              Available Capacity
+            </div>
+            <div className="text-4xl font-bold leading-none text-[#1A1A1A]">
+              {availableBeds}
+            </div>
+          </div>
+          <div className="text-[10px] mt-4 text-[#666662] uppercase tracking-wider font-semibold">
+            {reservedBeds > 0 ? `${reservedBeds} beds reserved` : 'Across active floors'}
+          </div>
+        </div>
+
+        {/* Metric 3: Active Buildings */}
+        <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+              Active Properties
+            </div>
+            <div className="text-4xl font-bold leading-none text-[#1A1A1A]">
+              0{data.buildings.length}
+            </div>
+          </div>
+          <div className="text-[10px] mt-4 text-[#666662] uppercase tracking-wider font-semibold">
+            {data.floors.length} Floors • {data.rooms.length} Rooms
+          </div>
+        </div>
+
+        {/* Metric 4: Maintenance */}
+        <div className="bg-[#F0F0EE] border border-[#E5E5E1] p-6 flex flex-col justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+              Maintenance Alerts
+            </div>
+            <div className="text-4xl font-bold leading-none text-[#1A1A1A]">
+              0{maintenanceBedList.length}
+            </div>
+          </div>
+          <div className="text-[10px] mt-4 text-[#9E2A2B] font-bold uppercase tracking-wider">
+            {maintenanceRooms.length} Active Flagged Rooms
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions Bar */}
+      <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+            Executive Controls
+          </div>
+          <h2 className="text-xl font-bold text-[#1A1A1A]">
+            Property & Housing Management Actions
+          </h2>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={() => setActiveTab('assignments')}
+            className="flex-1 md:flex-none bg-[#1A1A1A] text-white text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs hover:bg-[#333330] transition-colors flex items-center justify-center gap-2"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Assign Resident</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('inventory')}
+            className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
+          >
+            <PlusCircle className="w-3.5 h-3.5 text-[#666662]" />
+            <span>Manage Inventory</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#666662]" />
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Grid: Category Availability + Maintenance & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left 2 Columns: Category Breakdown & Building Summaries */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs">
+            <div className="flex items-center justify-between pb-4 border-b border-[#E5E5E1] mb-6">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A]">
+                  Capacity by Room Category
+                </h3>
+                <p className="text-xs text-[#666662] mt-0.5">
+                  Occupancy distribution across configured room classifications
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className="text-[10px] uppercase font-bold tracking-widest text-[#1A1A1A] border-b border-[#1A1A1A] flex items-center gap-1"
+              >
+                <span>Edit Types</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {categoryBreakdown.map((item) => (
+                <div key={item.type.id} className="p-4 bg-[#F9F9F8] border border-[#E5E5E1] rounded-xs">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: item.type.badgeColor || '#1A1A1A' }}
+                      />
+                      <span className="font-bold text-base text-[#1A1A1A]">
+                        {item.type.name}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] bg-white px-2 py-0.5 border border-[#E5E5E1]">
+                        {item.totalRooms} Rooms ({item.type.defaultBedCount} beds/rm)
+                      </span>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-[#1A1A1A]">
+                        {item.occupiedBeds} / {item.totalBeds} Occupied
+                      </span>
+                      <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-[#1E5D38] bg-[#EBF5EE] px-2 py-0.5 border border-[#C5E3CE]">
+                        {item.availableBeds} Available
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-[#E5E5E1] h-1.5 rounded-none overflow-hidden mt-3">
+                    <div
+                      className="h-full transition-all duration-300"
+                      style={{
+                        width: `${item.percentage}%`,
+                        backgroundColor: item.type.badgeColor || '#1A1A1A',
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Building Overview Cards */}
+          <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A] pb-3 border-b border-[#E5E5E1] mb-4">
+              Building Performance
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {data.buildings.map((b) => {
+                const bRooms = data.rooms.filter((r) => r.buildingId === b.id);
+                const rIds = bRooms.map((r) => r.id);
+                const bBeds = data.beds.filter((bd) => rIds.includes(bd.roomId));
+                const bOcc = bBeds.filter((bd) => bd.assignedTo != null).length;
+                const bTotal = bBeds.length;
+                const bPct = bTotal > 0 ? Math.round((bOcc / bTotal) * 100) : 0;
+
+                return (
+                  <div key={b.id} className="p-4 border border-[#E5E5E1] bg-[#F9F9F8]">
+                    <div className="text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1">
+                      {b.code}
+                    </div>
+                    <div className="font-bold text-[#1A1A1A] text-lg">{b.name}</div>
+                    <div className="text-xs text-[#666662] mt-1">
+                      {bRooms.length} Rooms • {bTotal} Beds
+                    </div>
+                    <div className="mt-3 flex items-center justify-between text-xs font-bold">
+                      <span className="text-[#666662] uppercase tracking-wider text-[10px]">Occupancy</span>
+                      <span className="text-[#1A1A1A]">{bPct}%</span>
+                    </div>
+                    <div className="w-full bg-[#E5E5E1] h-1 mt-1">
+                      <div
+                        className="bg-[#1A1A1A] h-full"
+                        style={{ width: `${bPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Maintenance Panel & Activity Log */}
+        <div className="space-y-8">
+          {/* Maintenance Panel */}
+          <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E1] mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A] flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#9E2A2B]" />
+                <span>Maintenance</span>
+              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FDF2F0] text-[#9E2A2B] border border-[#F5C6C2]">
+                {maintenanceBedList.length} Beds
+              </span>
+            </div>
+
+            {maintenanceBedList.length === 0 ? (
+              <div className="py-8 text-center bg-[#F9F9F8] border border-dashed border-[#E5E5E1]">
+                <ShieldCheck className="w-8 h-8 text-[#1E5D38] mx-auto mb-2" />
+                <p className="text-xs font-bold uppercase tracking-wider text-[#1A1A1A]">Operational Integrity</p>
+                <p className="text-[11px] text-[#A3A39F] mt-1">No pending maintenance tickets.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {maintenanceBedList.map((bed) => {
+                  const room = data.rooms.find((r) => r.id === bed.roomId);
+                  const bldg = data.buildings.find((b) => b.id === room?.buildingId);
+
+                  return (
+                    <div
+                      key={bed.id}
+                      className="p-3 bg-[#FDF2F0] border border-[#F5C6C2] flex items-start justify-between gap-3"
+                    >
+                      <div>
+                        <div className="text-xs font-bold text-[#9E2A2B]">
+                          {bldg?.code || 'BLDG'} • Room #{room?.roomNumber || 'N/A'} - {bed.label}
+                        </div>
+                        <div className="text-[11px] text-[#666662] mt-1">
+                          {bed.notes || room?.notes || 'Flagged for service/repairs'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('assignments')}
+                        className="text-[10px] font-bold uppercase tracking-wider text-[#9E2A2B] hover:underline shrink-0"
+                      >
+                        Inspect
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Activity Logs */}
+          <div className="bg-white border border-[#E5E5E1] p-6 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E1] mb-4">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A] flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#A3A39F]" />
+                <span>Audit Log</span>
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              {data.logs.slice(0, 6).map((log) => (
+                <div key={log.id} className="pb-3 border-b border-[#F0F0EE] last:border-0 last:pb-0 text-xs">
+                  <div className="font-bold text-[#1A1A1A]">{log.title}</div>
+                  <div className="text-[#666662] mt-0.5 leading-snug">{log.details}</div>
+                  <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] mt-1">
+                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {log.actor || 'System'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

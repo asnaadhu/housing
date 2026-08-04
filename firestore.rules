@@ -1,0 +1,160 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper functions for entity validation
+    function isValidBuilding(data) {
+      return data.id is string && isValidId(data.id)
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.code is string && data.code.size() > 0 && data.code.size() <= 30
+        && (!('description' in data) || (data.description is string && data.description.size() <= 500));
+    }
+
+    function isValidFloor(data) {
+      return data.id is string && isValidId(data.id)
+        && data.buildingId is string && isValidId(data.buildingId)
+        && data.number is number
+        && data.label is string && data.label.size() > 0 && data.label.size() <= 100
+        && (!('description' in data) || (data.description is string && data.description.size() <= 500));
+    }
+
+    function isValidRoomType(data) {
+      return data.id is string && isValidId(data.id)
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.defaultBedCount is number;
+    }
+
+    function isValidStatusCategory(data) {
+      return data.id is string && isValidId(data.id)
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.type in ['room', 'bed', 'both']
+        && data.color is string && data.color.size() <= 50;
+    }
+
+    function isValidRoom(data) {
+      return data.id is string && isValidId(data.id)
+        && data.buildingId is string && isValidId(data.buildingId)
+        && data.floorId is string && isValidId(data.floorId)
+        && data.roomNumber is string && data.roomNumber.size() > 0 && data.roomNumber.size() <= 30
+        && data.roomTypeId is string && isValidId(data.roomTypeId)
+        && data.totalBeds is number
+        && data.statusId is string && isValidId(data.statusId);
+    }
+
+    function isValidBed(data) {
+      return data.id is string && isValidId(data.id)
+        && data.roomId is string && isValidId(data.roomId)
+        && data.bedNumber is number
+        && data.label is string && data.label.size() > 0 && data.label.size() <= 100
+        && data.statusId is string && isValidId(data.statusId);
+    }
+
+    function isValidActivityLog(data) {
+      return data.id is string && isValidId(data.id)
+        && data.timestamp is string
+        && data.action is string && data.action.size() <= 50
+        && data.title is string && data.title.size() <= 200
+        && data.details is string && data.details.size() <= 1000;
+    }
+
+    function isValidUserProfile(data) {
+      return data.id is string && isValidId(data.id)
+        && data.email is string && data.email.size() <= 150
+        && data.name is string && data.name.size() <= 100
+        && data.role in ['Admin', 'Property Manager', 'Staff', 'Tenant'];
+    }
+
+    function isValidMaintenanceRequest(data) {
+      return data.id is string && isValidId(data.id)
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 2000
+        && data.category is string
+        && data.urgency in ['Low', 'Medium', 'High', 'Urgent']
+        && data.status in ['New', 'In Progress', 'Pending Parts', 'Completed', 'Cancelled']
+        && data.buildingId is string && isValidId(data.buildingId)
+        && data.floorId is string && isValidId(data.floorId)
+        && data.roomId is string && isValidId(data.roomId)
+        && data.requesterId is string && isValidId(data.requesterId);
+    }
+
+    // Collection Rules
+    match /buildings/{buildingId} {
+      allow read: if true;
+      allow create, update: if isValidId(buildingId) && isValidBuilding(incoming());
+      allow delete: if isValidId(buildingId);
+    }
+
+    match /floors/{floorId} {
+      allow read: if true;
+      allow create, update: if isValidId(floorId) && isValidFloor(incoming());
+      allow delete: if isValidId(floorId);
+    }
+
+    match /roomTypes/{roomTypeId} {
+      allow read: if true;
+      allow create, update: if isValidId(roomTypeId) && isValidRoomType(incoming());
+      allow delete: if isValidId(roomTypeId);
+    }
+
+    match /statuses/{statusCategoryId} {
+      allow read: if true;
+      allow create, update: if isValidId(statusCategoryId) && isValidStatusCategory(incoming());
+      allow delete: if isValidId(statusCategoryId);
+    }
+
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow create, update: if isValidId(roomId) && isValidRoom(incoming());
+      allow delete: if isValidId(roomId);
+    }
+
+    match /beds/{bedId} {
+      allow read: if true;
+      allow create, update: if isValidId(bedId) && isValidBed(incoming());
+      allow delete: if isValidId(bedId);
+    }
+
+    match /logs/{logId} {
+      allow read: if true;
+      allow create, update: if isValidId(logId) && isValidActivityLog(incoming());
+      allow delete: if isValidId(logId);
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidId(userId) && isValidUserProfile(incoming());
+      allow delete: if isValidId(userId);
+    }
+
+    match /maintenanceRequests/{requestId} {
+      allow read: if true;
+      allow create, update: if isValidId(requestId) && isValidMaintenanceRequest(incoming());
+      allow delete: if isValidId(requestId);
+    }
+
+    match /_connection_test_/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
