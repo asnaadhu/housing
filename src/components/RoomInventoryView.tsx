@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useProperty } from '../context/PropertyContext';
+import { useAuth } from '../context/AuthContext';
 import { Room } from '../types';
 import { RoomModal } from './modals/RoomModal';
 import {
@@ -16,6 +17,8 @@ import {
 
 export const RoomInventoryView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { data, deleteRoom, setActiveTab } = useProperty();
+  const { canEditModule } = useAuth();
+  const canEditInventory = canEditModule('inventory') || canEditModule('settings');
 
   // View Mode State
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -80,13 +83,15 @@ export const RoomInventoryView: React.FC<{ embedded?: boolean }> = ({ embedded =
           </h2>
         </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[11px] uppercase tracking-widest transition-colors shadow-xs"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Room</span>
-        </button>
+        {canEditInventory && (
+          <button
+            onClick={handleOpenAddModal}
+            className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[11px] uppercase tracking-widest transition-colors shadow-xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Room</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Toolbar */}

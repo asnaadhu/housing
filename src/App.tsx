@@ -13,8 +13,38 @@ import { ReportsView } from './components/ReportsView';
 import { LoginPage } from './components/LoginPage';
 
 const MainContent: React.FC = () => {
-  const { activeTab, isLoading } = useProperty();
-  const { isAuthenticated } = useAuth();
+  const { activeTab, setActiveTab, isLoading } = useProperty();
+  const { isAuthenticated, canAccessModule, currentUser } = useAuth();
+
+  // Auto-redirect if active tab is not allowed for current role
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let isTabAllowed = true;
+    if (activeTab === 'dashboard') {
+      isTabAllowed = canAccessModule('dashboard');
+    } else if (activeTab === 'inventory') {
+      isTabAllowed = canAccessModule('inventory') || canAccessModule('settings');
+    } else if (activeTab === 'assignments') {
+      isTabAllowed = canAccessModule('assignments');
+    } else if (activeTab === 'maintenance') {
+      isTabAllowed = canAccessModule('maintenance');
+    } else if (activeTab === 'users') {
+      isTabAllowed = canAccessModule('users');
+    } else if (activeTab === 'reports') {
+      isTabAllowed = canAccessModule('reports');
+    } else if (activeTab === 'settings') {
+      isTabAllowed = canAccessModule('settings') || canAccessModule('inventory') || canAccessModule('users');
+    }
+
+    if (!isTabAllowed) {
+      if (canAccessModule('dashboard')) {
+        setActiveTab('dashboard');
+      } else if (canAccessModule('reports')) {
+        setActiveTab('reports');
+      }
+    }
+  }, [activeTab, currentUser.role, currentUser.modulePermissions, isAuthenticated]);
 
   if (isLoading) {
     return (

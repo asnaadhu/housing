@@ -124,7 +124,7 @@ export const RoleSwitcherModal: React.FC<RoleSwitcherModalProps> = ({ isOpen, on
                 Switch Role / Preview Persona
               </h3>
               <p className="text-[10px] text-[#A3A39F] uppercase tracking-wider font-bold">
-                Instantly evaluate permissions and interfaces for all 4 system roles
+                Instantly evaluate permissions and interfaces for all 5 system roles
               </p>
             </div>
           </div>

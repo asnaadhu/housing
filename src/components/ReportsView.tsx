@@ -73,6 +73,7 @@ export const ReportsView: React.FC = () => {
           isOccupied,
           memberName: bed.assignedTo?.memberName || '-',
           employeeId: bed.assignedTo?.employeeId || '-',
+          position: bed.assignedTo?.position || '-',
           department: bed.assignedTo?.department || '-',
           contactPhone: bed.assignedTo?.contactPhone || bed.assignedTo?.phone || '-',
           checkInDate: bed.assignedTo?.checkInDate || '-',
@@ -89,10 +90,11 @@ export const ReportsView: React.FC = () => {
           const q = searchQuery.toLowerCase();
           const matchName = row.memberName.toLowerCase().includes(q);
           const matchEmp = row.employeeId.toLowerCase().includes(q);
+          const matchPos = row.position.toLowerCase().includes(q);
           const matchDept = row.department.toLowerCase().includes(q);
           const matchRoom = row.roomNumber.toLowerCase().includes(q);
           const matchBldg = row.buildingName.toLowerCase().includes(q);
-          if (!matchName && !matchEmp && !matchDept && !matchRoom && !matchBldg) return false;
+          if (!matchName && !matchEmp && !matchPos && !matchDept && !matchRoom && !matchBldg) return false;
         }
 
         if (dateFrom && row.checkInDate !== '-') {
@@ -475,6 +477,7 @@ export const ReportsView: React.FC = () => {
           'Bed',
           'Occupant Name',
           'Emp ID',
+          'Position',
           'Department',
           'Phone',
           'Status',
@@ -488,6 +491,7 @@ export const ReportsView: React.FC = () => {
         r.bedLabel,
         r.memberName,
         r.employeeId,
+        r.position,
         r.department,
         r.contactPhone,
         r.isOccupied ? 'Occupied' : 'Vacant',
@@ -829,6 +833,7 @@ export const ReportsView: React.FC = () => {
                   <th className="py-3 px-3">Bed</th>
                   <th className="py-3 px-4">Occupant Name</th>
                   <th className="py-3 px-3">Employee ID</th>
+                  <th className="py-3 px-3">Position</th>
                   <th className="py-3 px-3">Department</th>
                   <th className="py-3 px-3">Status</th>
                   <th className="py-3 px-3">Check-In</th>
@@ -838,7 +843,7 @@ export const ReportsView: React.FC = () => {
               <tbody className="divide-y divide-[#E5E5E1] bg-white">
                 {filteredOccupancyRows.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-8 text-center text-[#A3A39F] font-semibold">
+                    <td colSpan={10} className="py-8 text-center text-[#A3A39F] font-semibold">
                       No matching bed occupancy records found.
                     </td>
                   </tr>
@@ -856,6 +861,7 @@ export const ReportsView: React.FC = () => {
                         )}
                       </td>
                       <td className="py-3 px-3 font-mono text-[#666662]">{row.employeeId}</td>
+                      <td className="py-3 px-3 text-[#1A1A1A] font-medium">{row.position}</td>
                       <td className="py-3 px-3 text-[#1A1A1A] font-medium">{row.department}</td>
                       <td className="py-3 px-3">
                         {row.isOccupied ? (

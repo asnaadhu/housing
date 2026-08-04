@@ -112,12 +112,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Load persisted user or sync with data.users
   useEffect(() => {
     const savedUserId = localStorage.getItem(AUTH_USER_KEY);
-    if (savedUserId && usersList.length > 0) {
-      const found = usersList.find((u) => u.id === savedUserId);
-      if (found) {
-        setCurrentUser(found);
-        setIsAuthenticated(true);
-        return;
+    if (savedUserId) {
+      if (usersList.length > 0) {
+        const found = usersList.find((u) => u.id === savedUserId);
+        if (found) {
+          setCurrentUser(found);
+          setIsAuthenticated(true);
+          return;
+        }
+      }
+      // If user was temp user, keep role if matches
+      if (savedUserId.startsWith('usr-') && savedUserId.endsWith('-temp')) {
+        const roleFromId = currentUser.role;
+        if (roleFromId) {
+          setIsAuthenticated(true);
+        }
       }
     }
   }, [data?.users]);
@@ -148,6 +157,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
       setCurrentUser(tempUser);
       setIsAuthenticated(true);
+      localStorage.setItem(AUTH_USER_KEY, tempUser.id);
     }
   };
 

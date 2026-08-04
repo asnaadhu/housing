@@ -19,6 +19,7 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
   const [selectedBedId, setSelectedBedId] = useState<string>('');
   const [memberName, setMemberName] = useState<string>('');
   const [employeeId, setEmployeeId] = useState<string>('');
+  const [position, setPosition] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
@@ -32,6 +33,7 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
       if (bedToAssign.assignedTo) {
         setMemberName(bedToAssign.assignedTo.memberName);
         setEmployeeId(bedToAssign.assignedTo.employeeId);
+        setPosition(bedToAssign.assignedTo.position || '');
         setDepartment(bedToAssign.assignedTo.department);
         setEmail(bedToAssign.assignedTo.email || '');
         setPhone(bedToAssign.assignedTo.phone || '');
@@ -51,6 +53,7 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
   const resetFormFields = () => {
     setMemberName('');
     setEmployeeId(`EMP-${Math.floor(1000 + Math.random() * 9000)}`);
+    setPosition('');
     setDepartment('Operations');
     setEmail('');
     setPhone('');
@@ -71,6 +74,7 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
       memberId: `mem-${Date.now()}`,
       memberName: memberName.trim(),
       employeeId: employeeId.trim(),
+      position: position.trim(),
       department: department.trim() || 'General Operations',
       email: email.trim(),
       phone: phone.trim(),
@@ -172,6 +176,20 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Position */}
+            <div>
+              <label className="block text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1.5">
+                Position / Job Title
+              </label>
+              <input
+                type="text"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                placeholder="e.g. Senior Supervisor, Technician"
+                className="w-full px-3 py-2 border border-[#E5E5E1] text-[#1A1A1A] text-xs focus:outline-none focus:border-[#1A1A1A]"
+              />
+            </div>
+
             {/* Department */}
             <div>
               <label className="block text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1.5">
@@ -185,7 +203,9 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
                 className="w-full px-3 py-2 border border-[#E5E5E1] text-[#1A1A1A] text-xs focus:outline-none focus:border-[#1A1A1A]"
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             {/* Contact Email */}
             <div>
               <label className="block text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1.5">
@@ -196,6 +216,20 @@ export const AssignMemberModal: React.FC<AssignMemberModalProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
+                className="w-full px-3 py-2 border border-[#E5E5E1] text-[#1A1A1A] text-xs focus:outline-none focus:border-[#1A1A1A]"
+              />
+            </div>
+
+            {/* Contact Phone */}
+            <div>
+              <label className="block text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1.5">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 (555) 000-0000"
                 className="w-full px-3 py-2 border border-[#E5E5E1] text-[#1A1A1A] text-xs focus:outline-none focus:border-[#1A1A1A]"
               />
             </div>

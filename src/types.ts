@@ -37,6 +37,7 @@ export interface BedAssignment {
   memberName: string;
   employeeId: string;
   department: string;
+  position?: string;
   email?: string;
   phone?: string;
   checkInDate: string;

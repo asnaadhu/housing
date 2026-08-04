@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useProperty } from '../context/PropertyContext';
+import { useAuth } from '../context/AuthContext';
 import { Bed } from '../types';
 import { AssignMemberModal } from './modals/AssignMemberModal';
 import {
@@ -18,6 +19,7 @@ import {
 
 export const BedAssignmentsView: React.FC = () => {
   const { data, checkoutBed, updateBedStatus } = useProperty();
+  const { canEditModule } = useAuth();
 
   // View Mode State
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -71,8 +73,9 @@ export const BedAssignmentsView: React.FC = () => {
       const matchMemberName = bed.assignedTo?.memberName.toLowerCase().includes(q);
       const matchEmpId = bed.assignedTo?.employeeId.toLowerCase().includes(q);
       const matchDept = bed.assignedTo?.department.toLowerCase().includes(q);
+      const matchPos = bed.assignedTo?.position?.toLowerCase().includes(q);
 
-      if (!matchRoom && !matchBedLabel && !matchMemberName && !matchEmpId && !matchDept) {
+      if (!matchRoom && !matchBedLabel && !matchMemberName && !matchEmpId && !matchDept && !matchPos) {
         return false;
       }
     }
@@ -97,13 +100,15 @@ export const BedAssignmentsView: React.FC = () => {
           </h2>
         </div>
 
-        <button
-          onClick={() => handleOpenAssignModal()}
-          className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[11px] uppercase tracking-widest transition-colors shadow-xs"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Assign New Member</span>
-        </button>
+        {canEditModule('assignments') && (
+          <button
+            onClick={() => handleOpenAssignModal()}
+            className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[11px] uppercase tracking-widest transition-colors shadow-xs"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Assign New Member</span>
+          </button>
+        )}
       </div>
 
       {/* Summary Stat Pills */}
@@ -363,9 +368,12 @@ export const BedAssignmentsView: React.FC = () => {
                     <td className="py-3.5 px-4 text-[#666662]">
                       {isAssigned ? (
                         <div>
-                          <div>{bed.assignedTo?.department || 'General'}</div>
+                          {bed.assignedTo?.position && (
+                            <div className="font-semibold text-[#1A1A1A]">{bed.assignedTo.position}</div>
+                          )}
+                          <div className="text-xs text-[#666662]">{bed.assignedTo?.department || 'General'}</div>
                           <div className="text-[10px] text-[#A3A39F]">
-                            {bed.assignedTo?.contactPhone || '-'}
+                            {bed.assignedTo?.phone || bed.assignedTo?.contactPhone || '-'}
                           </div>
                         </div>
                       ) : (
@@ -483,7 +491,17 @@ export const BedAssignmentsView: React.FC = () => {
 
                       <div className="text-xs text-[#666662] flex items-center gap-1.5">
                         <Briefcase className="w-3.5 h-3.5 text-[#A3A39F]" />
-                        <span>Department: <strong className="text-[#1A1A1A]">{bed.assignedTo?.department}</strong></span>
+                        <span>
+                          {bed.assignedTo?.position ? (
+                            <>
+                              Position: <strong className="text-[#1A1A1A]">{bed.assignedTo.position}</strong> ({bed.assignedTo.department})
+                            </>
+                          ) : (
+                            <>
+                              Dept: <strong className="text-[#1A1A1A]">{bed.assignedTo?.department}</strong>
+                            </>
+                          )}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] pt-2 border-t border-[#E5E5E1]">

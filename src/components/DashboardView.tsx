@@ -1,5 +1,6 @@
 import React from 'react';
 import { useProperty } from '../context/PropertyContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Building2,
   AlertTriangle,
@@ -7,10 +8,13 @@ import {
   ArrowRight,
   ShieldCheck,
   UserPlus,
+  FileSpreadsheet,
+  Wrench,
 } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
   const { data, setActiveTab } = useProperty();
+  const { canAccessModule, canEditModule } = useAuth();
 
   const totalBeds = data.beds.length;
   const occupiedBeds = data.beds.filter((b) => b.assignedTo != null).length;
@@ -146,13 +150,35 @@ export const DashboardView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <button
-            onClick={() => setActiveTab('assignments')}
-            className="flex-1 md:flex-none bg-[#1A1A1A] text-white text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs hover:bg-[#333330] transition-colors flex items-center justify-center gap-2"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Assign Resident</span>
-          </button>
+          {canEditModule('assignments') && (
+            <button
+              onClick={() => setActiveTab('assignments')}
+              className="flex-1 md:flex-none bg-[#1A1A1A] text-white text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs hover:bg-[#333330] transition-colors flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Assign Resident</span>
+            </button>
+          )}
+
+          {canAccessModule('maintenance') && (
+            <button
+              onClick={() => setActiveTab('maintenance')}
+              className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
+            >
+              <Wrench className="w-3.5 h-3.5 text-[#666662]" />
+              <span>Maintenance Portal</span>
+            </button>
+          )}
+
+          {canAccessModule('reports') && (
+            <button
+              onClick={() => setActiveTab('reports')}
+              className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#666662]" />
+              <span>View Reports</span>
+            </button>
+          )}
         </div>
       </div>
 

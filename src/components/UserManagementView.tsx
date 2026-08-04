@@ -29,7 +29,9 @@ import { UserModal } from './modals/UserModal';
 
 export const UserManagementView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { data, deleteUser } = useProperty();
-  const { currentUser, switchUserById, switchRole } = useAuth();
+  const { currentUser, switchUserById, switchRole, canEditModule } = useAuth();
+
+  const canManageUsers = currentUser.role === 'Admin' || canEditModule('users');
 
   const [activeSubTab, setActiveSubTab] = useState<'accounts' | 'matrix'>('accounts');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -143,13 +145,15 @@ export const UserManagementView: React.FC<{ embedded?: boolean }> = ({ embedded 
           </h1>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[10px] uppercase tracking-widest transition-colors shadow-xs self-start md:self-auto"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>Add User Account</span>
-        </button>
+        {canManageUsers && (
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#1A1A1A] hover:bg-[#333330] text-white font-bold text-[10px] uppercase tracking-widest transition-colors shadow-xs self-start md:self-auto"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Add User Account</span>
+          </button>
+        )}
       </div>
 
       {/* Role Summary Stats */}
