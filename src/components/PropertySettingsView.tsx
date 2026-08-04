@@ -29,8 +29,7 @@ export const PropertySettingsView: React.FC = () => {
     deleteStatusCategory,
   } = useProperty();
 
-  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'rooms' | 'floors' | 'types' | 'statuses'>('buildings');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'rooms' | 'types' | 'statuses'>('buildings');
 
   // Building Modal State
   const [isBuildingModalOpen, setIsBuildingModalOpen] = useState<boolean>(false);
@@ -160,350 +159,206 @@ export const PropertySettingsView: React.FC = () => {
 
   return (
     <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
-      {/* Module Navigation Tabs & View Toggle */}
+      {/* Sub-Tab Navigation Bar */}
       <div className="bg-white p-2 border border-[#E5E5E1] shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveSubTab('buildings')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
               activeSubTab === 'buildings'
                 ? 'bg-[#1A1A1A] text-white shadow-xs'
                 : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
             }`}
           >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>1. Buildings & Blocks ({data.buildings.length})</span>
+            <Building2 className="w-4 h-4" />
+            <span>Buildings & Floors ({data.buildings.length})</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('rooms')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
               activeSubTab === 'rooms'
                 ? 'bg-[#1A1A1A] text-white shadow-xs'
                 : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
             }`}
           >
-            <Home className="w-3.5 h-3.5" />
-            <span>2. Room Inventory ({data.rooms.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('floors')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
-              activeSubTab === 'floors'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>3. Floors & Layouts ({data.floors.length})</span>
+            <Home className="w-4 h-4" />
+            <span>Room Inventory ({data.rooms.length})</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('types')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
               activeSubTab === 'types'
                 ? 'bg-[#1A1A1A] text-white shadow-xs'
                 : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
             }`}
           >
-            <Tag className="w-3.5 h-3.5" />
-            <span>4. Room Types & Defaults ({data.roomTypes.length})</span>
+            <Tag className="w-4 h-4" />
+            <span>Room Types & Defaults ({data.roomTypes.length})</span>
           </button>
 
           <button
             onClick={() => setActiveSubTab('statuses')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
               activeSubTab === 'statuses'
                 ? 'bg-[#1A1A1A] text-white shadow-xs'
                 : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
             }`}
           >
-            <Shield className="w-3.5 h-3.5" />
-            <span>5. Custom Status Categories ({data.statuses.length})</span>
-          </button>
-        </div>
-
-        {/* View Switcher */}
-        <div className="flex items-center gap-1 bg-[#F0F0EE] p-1 border border-[#E5E5E1]">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-              viewMode === 'grid'
-                ? 'bg-[#1A1A1A] text-white shadow-2xs'
-                : 'text-[#666662] hover:text-[#1A1A1A]'
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Grid View</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('list')}
-            className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-              viewMode === 'list'
-                ? 'bg-[#1A1A1A] text-white shadow-2xs'
-                : 'text-[#666662] hover:text-[#1A1A1A]'
-            }`}
-          >
-            <List className="w-3.5 h-3.5" />
-            <span>List View</span>
+            <Shield className="w-4 h-4" />
+            <span>Status Categories ({data.statuses.length})</span>
           </button>
         </div>
       </div>
 
-      {/* SUB-TAB 1: BUILDINGS & BLOCKS */}
+      {/* SUB-TAB 1: BUILDINGS & FLOORS */}
       {activeSubTab === 'buildings' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
-                Property Architecture
+                Property Hierarchy
               </div>
               <h3 className="text-2xl font-bold text-[#1A1A1A]">
-                Buildings & Towers
+                Buildings & Floor Levels
               </h3>
             </div>
             <button
               onClick={handleOpenAddBuilding}
-              className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white text-[10px] font-bold uppercase tracking-widest transition-colors shadow-xs"
+              className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white text-[11px] font-bold uppercase tracking-widest transition-colors shadow-xs"
             >
               <Plus className="w-4 h-4" />
               <span>Add Building</span>
             </button>
           </div>
 
-          {viewMode === 'list' ? (
-            <div className="bg-white border border-[#E5E5E1] shadow-2xs overflow-x-auto">
-              <table className="w-full text-left text-xs font-sans border-collapse">
-                <thead className="bg-[#1A1A1A] text-white text-[10px] uppercase tracking-wider font-bold">
-                  <tr>
-                    <th className="py-3 px-4">Code</th>
-                    <th className="py-3 px-4">Building Name</th>
-                    <th className="py-3 px-4">Floors</th>
-                    <th className="py-3 px-4">Rooms</th>
-                    <th className="py-3 px-4">Created Date</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E5E5E1]">
-                  {data.buildings.map((bldg) => {
-                    const buildingFloors = data.floors.filter((f) => f.buildingId === bldg.id);
-                    const buildingRooms = data.rooms.filter((r) => r.buildingId === bldg.id);
+          <div className="space-y-6">
+            {data.buildings.length === 0 ? (
+              <div className="bg-white p-8 border border-[#E5E5E1] text-center text-[#A3A39F] font-semibold">
+                No buildings configured. Click "Add Building" above to create your first property block.
+              </div>
+            ) : (
+              data.buildings.map((bldg) => {
+                const bldgFloors = data.floors.filter((f) => f.buildingId === bldg.id);
+                const bldgRooms = data.rooms.filter((r) => r.buildingId === bldg.id);
 
-                    return (
-                      <tr key={bldg.id} className="hover:bg-[#F9F9F8] transition-colors">
-                        <td className="py-3.5 px-4 font-mono font-bold text-[#1A1A1A]">
-                          <span className="px-2 py-0.5 bg-[#1A1A1A] text-white text-[10px]">
-                            {bldg.code}
-                          </span>
-                        </td>
-
-                        <td className="py-3.5 px-4 font-bold text-[#1A1A1A]">
-                          <div>{bldg.name}</div>
+                return (
+                  <div key={bldg.id} className="bg-white p-6 border border-[#E5E5E1] shadow-xs space-y-4">
+                    {/* Building Header */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#E5E5E1]">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 rounded-xs bg-[#1A1A1A] text-white font-mono font-bold text-xs tracking-widest">
+                          {bldg.code}
+                        </span>
+                        <div>
+                          <h4 className="text-xl font-bold text-[#1A1A1A]">{bldg.name}</h4>
                           {bldg.description && (
-                            <p className="text-[10px] text-[#A3A39F] font-normal">{bldg.description}</p>
+                            <p className="text-xs text-[#666662] mt-0.5">{bldg.description}</p>
                           )}
-                        </td>
+                        </div>
+                      </div>
 
-                        <td className="py-3.5 px-4 font-bold text-[#1A1A1A]">
-                          {buildingFloors.length} Floors
-                        </td>
-
-                        <td className="py-3.5 px-4 font-bold text-[#1A1A1A]">
-                          {buildingRooms.length} Rooms
-                        </td>
-
-                        <td className="py-3.5 px-4 text-[#A3A39F] text-[11px] font-mono">
-                          {new Date(bldg.createdAt).toLocaleDateString()}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-right space-x-2">
-                          <button
-                            onClick={() => handleOpenAddFloor(bldg.id)}
-                            className="text-[10px] font-bold text-indigo-700 hover:underline uppercase tracking-wider"
-                          >
-                            + Add Floor
-                          </button>
-                          <button
-                            onClick={() => handleOpenEditBuilding(bldg)}
-                            className="p-1 text-[#1A1A1A] hover:bg-[#F0F0EE] inline-block"
-                            title="Edit Building"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteBuilding(bldg)}
-                            className="p-1 text-rose-700 hover:bg-rose-50 inline-block"
-                            title="Delete Building"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.buildings.map((bldg) => {
-              const buildingFloors = data.floors.filter((f) => f.buildingId === bldg.id);
-              const buildingRooms = data.rooms.filter((r) => r.buildingId === bldg.id);
-
-              return (
-                <div
-                  key={bldg.id}
-                  className="bg-white p-6 border border-[#E5E5E1] shadow-xs flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E1]">
-                      <span className="px-2.5 py-1 rounded-xs bg-[#1A1A1A] text-white font-mono font-bold text-[10px] tracking-widest">
-                        {bldg.code}
-                      </span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#666662] bg-[#F9F9F8] px-3 py-1.5 border border-[#E5E5E1]">
+                          {bldgFloors.length} Floors &bull; {bldgRooms.length} Rooms
+                        </span>
+                        <button
+                          onClick={() => handleOpenAddFloor(bldg.id)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-[#1A1A1A] text-white text-[10px] font-bold uppercase tracking-wider hover:bg-[#333330] transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Floor</span>
+                        </button>
                         <button
                           onClick={() => handleOpenEditBuilding(bldg)}
-                          className="p-1.5 text-[#A3A39F] hover:text-[#1A1A1A]"
-                          title="Rename/Edit"
+                          className="p-1.5 text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE] border border-transparent hover:border-[#E5E5E1]"
+                          title="Edit Building"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteBuilding(bldg)}
-                          className="p-1.5 text-[#A3A39F] hover:text-[#9E2A2B]"
-                          title="Delete"
+                          className="p-1.5 text-[#666662] hover:text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200"
+                          title="Delete Building"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
-                    <h4 className="text-xl font-bold text-[#1A1A1A] mt-3">{bldg.name}</h4>
-                    {bldg.description && (
-                      <p className="text-xs text-[#666662] mt-1">{bldg.description}</p>
-                    )}
+                    {/* Floors List under this building */}
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] mb-3 flex items-center gap-2">
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Configured Floor Levels ({bldgFloors.length})</span>
+                      </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#E5E5E1] grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-[#F9F9F8] p-3 border border-[#E5E5E1] text-center">
-                        <div className="font-bold text-lg text-[#1A1A1A]">{buildingFloors.length}</div>
-                        <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F]">Floors</div>
-                      </div>
-                      <div className="bg-[#F9F9F8] p-3 border border-[#E5E5E1] text-center">
-                        <div className="font-bold text-lg text-[#1A1A1A]">{buildingRooms.length}</div>
-                        <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F]">Rooms</div>
-                      </div>
+                      {bldgFloors.length === 0 ? (
+                        <div className="p-4 bg-[#F9F9F8] border border-dashed border-[#E5E5E1] text-xs text-[#A3A39F] flex items-center justify-between">
+                          <span>No floors created for this building yet.</span>
+                          <button
+                            onClick={() => handleOpenAddFloor(bldg.id)}
+                            className="text-[#1A1A1A] font-bold underline hover:text-[#333330]"
+                          >
+                            + Create First Floor
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {bldgFloors.map((flr) => {
+                            const floorRooms = data.rooms.filter((r) => r.floorId === flr.id);
+
+                            return (
+                              <div
+                                key={flr.id}
+                                className="p-3.5 bg-[#F9F9F8] border border-[#E5E5E1] flex items-center justify-between hover:border-[#1A1A1A] transition-colors"
+                              >
+                                <div>
+                                  <div className="font-bold text-[#1A1A1A] text-sm flex items-center gap-2">
+                                    <span>{flr.label}</span>
+                                    <span className="text-[10px] font-mono font-normal text-[#A3A39F]">
+                                      (Level #{flr.number})
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] font-bold text-[#666662] mt-0.5">
+                                    {floorRooms.length} Rooms Assigned
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleOpenEditFloor(flr)}
+                                    className="p-1 text-[#A3A39F] hover:text-[#1A1A1A]"
+                                    title="Edit Floor"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteFloor(flr)}
+                                    className="p-1 text-[#A3A39F] hover:text-rose-700"
+                                    title="Delete Floor"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  <div className="mt-6 pt-3 border-t border-[#E5E5E1] flex items-center justify-between text-[10px] uppercase tracking-wider font-bold text-[#A3A39F]">
-                    <span>Created: {new Date(bldg.createdAt).toLocaleDateString()}</span>
-                    <button
-                      onClick={() => handleOpenAddFloor(bldg.id)}
-                      className="text-[#1A1A1A] hover:underline"
-                    >
-                      + Add Floor
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
-        )}
-      </div>
-    )}
+        </div>
+      )}
 
       {/* SUB-TAB 2: ROOM INVENTORY */}
       {activeSubTab === 'rooms' && (
         <RoomInventoryView embedded={true} />
-      )}
-
-      {/* SUB-TAB 3: FLOORS & LAYOUTS */}
-      {activeSubTab === 'floors' && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
-                Vertical Layouts
-              </div>
-              <h3 className="text-2xl font-bold text-[#1A1A1A]">Floor Layouts</h3>
-            </div>
-            <button
-              onClick={() => handleOpenAddFloor()}
-              className="flex items-center gap-2 px-5 py-3 rounded-xs bg-[#1A1A1A] hover:bg-[#333330] text-white text-[10px] font-bold uppercase tracking-widest transition-colors shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Floor Level</span>
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            {data.buildings.map((bldg) => {
-              const bldgFloors = data.floors.filter((f) => f.buildingId === bldg.id);
-
-              return (
-                <div key={bldg.id} className="bg-white p-6 border border-[#E5E5E1] shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E1]">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-[#1A1A1A]" />
-                      <h4 className="font-bold text-[#1A1A1A] text-lg">
-                        {bldg.name} <span className="text-xs font-mono text-[#A3A39F]">({bldg.code})</span>
-                      </h4>
-                    </div>
-                    <button
-                      onClick={() => handleOpenAddFloor(bldg.id)}
-                      className="text-[10px] uppercase font-bold tracking-widest text-[#1A1A1A] border-b border-[#1A1A1A]"
-                    >
-                      + Add Floor to {bldg.code}
-                    </button>
-                  </div>
-
-                  {bldgFloors.length === 0 ? (
-                    <p className="text-xs text-[#A3A39F] py-2">No floors defined for this building yet.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {bldgFloors.map((flr) => {
-                        const floorRooms = data.rooms.filter((r) => r.floorId === flr.id);
-
-                        return (
-                          <div
-                            key={flr.id}
-                            className="p-4 bg-[#F9F9F8] border border-[#E5E5E1] flex items-center justify-between"
-                          >
-                            <div>
-                              <div className="font-bold text-[#1A1A1A] text-base">
-                                {flr.label} <span className="text-xs font-sans text-[#A3A39F]">(Level #{flr.number})</span>
-                              </div>
-                              <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] mt-1">
-                                {floorRooms.length} Rooms Assigned
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleOpenEditFloor(flr)}
-                                className="p-1.5 text-[#A3A39F] hover:text-[#1A1A1A]"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteFloor(flr)}
-                                className="p-1.5 text-[#A3A39F] hover:text-[#9E2A2B]"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
       )}
 
       {/* SUB-TAB 3: ROOM TYPES & BED CONFIGURATIONS */}

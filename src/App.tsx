@@ -47,7 +47,6 @@ const MainContent: React.FC = () => {
           {activeTab === 'maintenance' && <MaintenanceView />}
           {activeTab === 'users' && <UserManagementView />}
           {activeTab === 'reports' && <ReportsView />}
-          {activeTab === 'settings' && <PropertySettingsView />}
         </main>
       </div>
     </div>
