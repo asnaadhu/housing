@@ -8,6 +8,9 @@ import {
   ShieldCheck,
   ArrowRight,
   ShieldAlert,
+  Phone,
+  HelpCircle,
+  MessageSquare,
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
@@ -140,6 +143,51 @@ export const LoginPage: React.FC = () => {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
+
+            {/* Support & Access Assistance */}
+            <div className="pt-5 border-t border-[#E5E5E1] mt-6">
+              <div className="flex items-center gap-2 text-[11px] font-bold text-[#1A1A1A] uppercase tracking-wider mb-2.5">
+                <HelpCircle className="w-4 h-4 text-[#1A1A1A]" />
+                <span>Need account access or password reset?</span>
+              </div>
+
+              <div className="p-4 bg-[#F9F9F8] border border-[#E5E5E1] rounded-xs text-xs space-y-2.5">
+                <div className="flex items-center justify-between text-[#1A1A1A] font-semibold pb-2 border-b border-[#E5E5E1]">
+                  <span className="text-[#A3A39F] text-[10px] uppercase font-bold tracking-widest">
+                    Contact Support
+                  </span>
+                  <span className="font-bold text-[#1A1A1A]">Ahmed Asnad</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-0.5">
+                  <a
+                    href="tel:+9607292184"
+                    className="flex items-center gap-2 text-[#1A1A1A] hover:text-[#000000] font-medium transition-colors"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-[#666662] shrink-0" />
+                    <span>Call: <strong>+960 729 2184</strong></span>
+                  </a>
+
+                  <a
+                    href="https://wa.me/9607292184"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-emerald-700 hover:text-emerald-800 font-medium transition-colors"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>WhatsApp: <strong>+960 729 2184</strong></span>
+                  </a>
+
+                  <a
+                    href="mailto:aasnad@avanihotels.com"
+                    className="sm:col-span-2 flex items-center gap-2 text-[#1A1A1A] hover:text-[#000000] font-medium transition-colors pt-1"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-[#666662] shrink-0" />
+                    <span>Email: <strong>aasnad@avanihotels.com</strong></span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
