@@ -157,11 +157,11 @@ export const DashboardView: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('inventory')}
+            onClick={() => setActiveTab('settings')}
             className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
           >
             <PlusCircle className="w-3.5 h-3.5 text-[#666662]" />
-            <span>Manage Inventory</span>
+            <span>Property Settings</span>
           </button>
 
           <button

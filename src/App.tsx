@@ -42,7 +42,7 @@ const MainContent: React.FC = () => {
 
         <main className="flex-1 p-8 pb-12 max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && <DashboardView />}
-          {activeTab === 'inventory' && <RoomInventoryView />}
+          {(activeTab === 'inventory' || activeTab === 'settings') && <PropertySettingsView />}
           {activeTab === 'assignments' && <BedAssignmentsView />}
           {activeTab === 'maintenance' && <MaintenanceView />}
           {activeTab === 'users' && <UserManagementView />}

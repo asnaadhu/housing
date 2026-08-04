@@ -29,13 +29,6 @@ export const Sidebar: React.FC = () => {
       show: true,
     },
     {
-      id: 'inventory',
-      label: 'Room Inventory',
-      icon: Building2,
-      badge: data.rooms.length.toString(),
-      show: true,
-    },
-    {
       id: 'assignments',
       label: 'Bed Assignments',
       icon: BedDouble,
@@ -53,7 +46,7 @@ export const Sidebar: React.FC = () => {
       id: 'reports',
       label: 'Reports',
       icon: FileSpreadsheet,
-      badge: 'PDF/XLS',
+      badge: null,
       show: true,
     },
     {

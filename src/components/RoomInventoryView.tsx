@@ -14,7 +14,7 @@ import {
   List,
 } from 'lucide-react';
 
-export const RoomInventoryView: React.FC = () => {
+export const RoomInventoryView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { data, deleteRoom, setActiveTab } = useProperty();
 
   // View Mode State
@@ -68,7 +68,7 @@ export const RoomInventoryView: React.FC = () => {
   });
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
+    <div className={embedded ? "space-y-6 font-sans" : "p-10 max-w-7xl mx-auto space-y-8 font-sans"}>
       {/* Top Header & Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

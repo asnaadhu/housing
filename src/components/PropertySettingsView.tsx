@@ -5,6 +5,7 @@ import { BuildingModal } from './modals/BuildingModal';
 import { FloorModal } from './modals/FloorModal';
 import { RoomTypeModal } from './modals/RoomTypeModal';
 import { StatusModal } from './modals/StatusModal';
+import { RoomInventoryView } from './RoomInventoryView';
 import {
   Building2,
   Layers,
@@ -16,6 +17,7 @@ import {
   BedDouble,
   LayoutGrid,
   List,
+  Home,
 } from 'lucide-react';
 
 export const PropertySettingsView: React.FC = () => {
@@ -27,7 +29,7 @@ export const PropertySettingsView: React.FC = () => {
     deleteStatusCategory,
   } = useProperty();
 
-  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'floors' | 'types' | 'statuses'>('buildings');
+  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'rooms' | 'floors' | 'types' | 'statuses'>('buildings');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Building Modal State
@@ -174,6 +176,18 @@ export const PropertySettingsView: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveSubTab('rooms')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
+              activeSubTab === 'rooms'
+                ? 'bg-[#1A1A1A] text-white shadow-xs'
+                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
+            }`}
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>2. Room Inventory ({data.rooms.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveSubTab('floors')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[10px] font-bold uppercase tracking-wider transition-colors ${
               activeSubTab === 'floors'
@@ -182,7 +196,7 @@ export const PropertySettingsView: React.FC = () => {
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>2. Floors & Layouts ({data.floors.length})</span>
+            <span>3. Floors & Layouts ({data.floors.length})</span>
           </button>
 
           <button
@@ -194,7 +208,7 @@ export const PropertySettingsView: React.FC = () => {
             }`}
           >
             <Tag className="w-3.5 h-3.5" />
-            <span>3. Room Types & Defaults ({data.roomTypes.length})</span>
+            <span>4. Room Types & Defaults ({data.roomTypes.length})</span>
           </button>
 
           <button
@@ -206,7 +220,7 @@ export const PropertySettingsView: React.FC = () => {
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
-            <span>4. Custom Status Categories ({data.statuses.length})</span>
+            <span>5. Custom Status Categories ({data.statuses.length})</span>
           </button>
         </div>
 
@@ -400,7 +414,12 @@ export const PropertySettingsView: React.FC = () => {
       </div>
     )}
 
-      {/* SUB-TAB 2: FLOORS & LAYOUTS */}
+      {/* SUB-TAB 2: ROOM INVENTORY */}
+      {activeSubTab === 'rooms' && (
+        <RoomInventoryView embedded={true} />
+      )}
+
+      {/* SUB-TAB 3: FLOORS & LAYOUTS */}
       {activeSubTab === 'floors' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
