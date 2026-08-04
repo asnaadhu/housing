@@ -29,6 +29,7 @@ import {
 } from '../types';
 import { INITIAL_PROPERTY_DATA } from '../data/initialData';
 import { db, handleFirestoreError, OperationType, validateFirestoreConnection } from '../lib/firebase';
+import { getFullClientMeta } from '../utils/deviceInfo';
 
 interface PropertyContextType {
   data: PropertyData;
@@ -133,7 +134,20 @@ interface PropertyContextType {
   updateUser: (id: string, updates: Partial<UserProfile>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
-  // Utility
+  // Utility & Audit
+  writeLog: (
+    action: ActivityLog['action'],
+    title: string,
+    details: string,
+    actorInfo?: {
+      actor?: string;
+      actorEmail?: string;
+      actorRole?: string;
+      ipAddress?: string;
+      browser?: string;
+      deviceType?: string;
+    }
+  ) => Promise<void>;
   resetToDefaults: () => Promise<void>;
   saveDataToServer: (newData: PropertyData) => Promise<void>;
 }
@@ -444,18 +458,36 @@ export const PropertyProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   // Log Writer Helper
-  const writeLog = async (action: ActivityLog['action'], title: string, details: string) => {
+  const writeLog = async (
+    action: ActivityLog['action'],
+    title: string,
+    details: string,
+    actorInfo?: {
+      actor?: string;
+      actorEmail?: string;
+      actorRole?: string;
+      ipAddress?: string;
+      browser?: string;
+      deviceType?: string;
+    }
+  ) => {
     try {
-      const logId = `log-${Date.now()}`;
+      const clientMeta = getFullClientMeta();
+      const logId = `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const newLog: ActivityLog = {
         id: logId,
         timestamp: new Date().toISOString(),
         action,
         title,
         details,
-        actor: 'Admin',
+        actor: actorInfo?.actor || 'Admin',
+        actorEmail: actorInfo?.actorEmail,
+        actorRole: actorInfo?.actorRole,
+        ipAddress: actorInfo?.ipAddress || clientMeta.ipAddress,
+        browser: actorInfo?.browser || clientMeta.browser,
+        deviceType: actorInfo?.deviceType || clientMeta.deviceType,
       };
-      await setDoc(doc(db, 'logs', logId), newLog);
+      await setDoc(doc(db, 'logs', logId), cleanUndefined(newLog));
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'logs');
     }
@@ -1165,6 +1197,7 @@ export const PropertyProvider: React.FC<{ children: ReactNode }> = ({ children }
         updateUser,
         deleteUser,
 
+        writeLog,
         resetToDefaults,
         saveDataToServer,
       }}

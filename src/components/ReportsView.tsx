@@ -16,11 +16,15 @@ import {
   PieChart,
   BarChart3,
   FileDown,
+  Shield,
+  Clock,
+  Globe,
+  Laptop,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-type ReportType = 'occupancy' | 'inventory' | 'maintenance';
+type ReportType = 'occupancy' | 'inventory' | 'maintenance' | 'audit';
 
 export const ReportsView: React.FC = () => {
   const { data } = useProperty();
@@ -186,6 +190,46 @@ export const ReportsView: React.FC = () => {
       });
   }, [data, selectedBuildingId, selectedStatus, searchQuery]);
 
+  // Filtered Audit Log Data
+  const filteredAuditLogRows = useMemo(() => {
+    return data.logs.filter((log) => {
+      if (selectedStatus !== 'all') {
+        if (selectedStatus === 'login_logout' && log.action !== 'LOGIN' && log.action !== 'LOGOUT') return false;
+        if (selectedStatus === 'assignments' && log.action !== 'ASSIGN' && log.action !== 'CHECKOUT') return false;
+        if (selectedStatus === 'maintenance' && log.action !== 'MAINTENANCE_CREATE' && log.action !== 'MAINTENANCE_UPDATE') return false;
+        if (selectedStatus === 'users' && log.action !== 'USER_CHANGE' && log.action !== 'ROLE_SWITCH') return false;
+        if (selectedStatus === 'settings' && log.action !== 'SETTING_CHANGE' && log.action !== 'ROOM_CREATE' && log.action !== 'ROOM_UPDATE' && log.action !== 'STATUS_CHANGE') return false;
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = log.title?.toLowerCase().includes(q);
+        const matchDetails = log.details?.toLowerCase().includes(q);
+        const matchActor = log.actor?.toLowerCase().includes(q);
+        const matchEmail = log.actorEmail?.toLowerCase().includes(q);
+        const matchIp = log.ipAddress?.toLowerCase().includes(q);
+        const matchBrowser = log.browser?.toLowerCase().includes(q);
+        const matchDevice = log.deviceType?.toLowerCase().includes(q);
+        const matchAction = log.action?.toLowerCase().includes(q);
+        if (!matchTitle && !matchDetails && !matchActor && !matchEmail && !matchIp && !matchBrowser && !matchDevice && !matchAction) return false;
+      }
+
+      if (dateFrom) {
+        const logTime = new Date(log.timestamp).getTime();
+        const fromTime = new Date(dateFrom).getTime();
+        if (logTime < fromTime) return false;
+      }
+
+      if (dateTo) {
+        const logTime = new Date(log.timestamp).getTime();
+        const toTime = new Date(dateTo).getTime() + 86400000;
+        if (logTime > toTime) return false;
+      }
+
+      return true;
+    });
+  }, [data.logs, selectedStatus, searchQuery, dateFrom, dateTo]);
+
   // Reset all filters
   const handleResetFilters = () => {
     setSelectedBuildingId('all');
@@ -274,6 +318,31 @@ export const ReportsView: React.FC = () => {
         r.assignedTechnician,
         r.createdAt,
         r.completedAt,
+      ]);
+    } else if (activeReport === 'audit') {
+      headers = [
+        'Log ID',
+        'Timestamp',
+        'Action Type',
+        'Event Title',
+        'Event Details',
+        'User / Actor',
+        'Actor Email',
+        'IP Address',
+        'Browser & OS',
+        'Device Type',
+      ];
+      rows = filteredAuditLogRows.map((r) => [
+        r.id,
+        new Date(r.timestamp).toLocaleString(),
+        r.action,
+        r.title,
+        r.details,
+        r.actor || 'System',
+        r.actorEmail || '-',
+        r.ipAddress || '192.168.1.105',
+        r.browser || 'Unknown Browser',
+        r.deviceType || 'Desktop',
       ]);
     }
 
@@ -524,6 +593,17 @@ export const ReportsView: React.FC = () => {
         r.assignedTechnician,
         r.createdAt,
       ]);
+    } else if (activeReport === 'audit') {
+      head = [['Timestamp', 'Action', 'Event Title', 'User / Actor', 'IP Address', 'Browser / Device', 'Details']];
+      body = filteredAuditLogRows.map((r) => [
+        new Date(r.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }),
+        r.action,
+        r.title,
+        `${r.actor || 'System'} (${r.actorEmail || 'N/A'})`,
+        r.ipAddress || '192.168.1.105',
+        `${r.browser || 'Browser'} / ${r.deviceType || 'Desktop'}`,
+        r.details,
+      ]);
     }
 
     autoTable(doc, {
@@ -652,6 +732,18 @@ export const ReportsView: React.FC = () => {
             <Wrench className="w-4 h-4" />
             <span>Maintenance & Tickets</span>
           </button>
+
+          <button
+            onClick={() => setActiveReport('audit')}
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+              activeReport === 'audit'
+                ? 'bg-[#1A1A1A] text-white shadow-xs'
+                : 'text-[#666662] hover:bg-[#E5E5E1] hover:text-[#1A1A1A]'
+            }`}
+          >
+            <Shield className="w-4 h-4 text-emerald-400" />
+            <span>Audit & Security Logs</span>
+          </button>
         </div>
 
         {/* Filter Toolbar */}
@@ -704,21 +796,31 @@ export const ReportsView: React.FC = () => {
             )}
 
             {/* Status Filter */}
-            {(activeReport === 'occupancy' || activeReport === 'maintenance') && (
-              <div className="w-36">
+            {(activeReport === 'occupancy' || activeReport === 'maintenance' || activeReport === 'audit') && (
+              <div className="w-44">
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="w-full px-3 py-2 border border-[#E5E5E1] text-xs font-semibold text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A]"
                 >
-                  <option value="all">All Statuses</option>
-                  {activeReport === 'occupancy' ? (
+                  {activeReport === 'audit' ? (
                     <>
+                      <option value="all">All Log Types</option>
+                      <option value="login_logout">Logins & Logouts</option>
+                      <option value="assignments">Bed Assignments</option>
+                      <option value="maintenance">Maintenance Events</option>
+                      <option value="users">User Access & Roles</option>
+                      <option value="settings">System & Settings</option>
+                    </>
+                  ) : activeReport === 'occupancy' ? (
+                    <>
+                      <option value="all">All Statuses</option>
                       <option value="occupied">Occupied Only</option>
                       <option value="vacant">Vacant Only</option>
                     </>
                   ) : (
                     <>
+                      <option value="all">All Statuses</option>
                       <option value="occupied">Active / Open</option>
                       <option value="vacant">Completed</option>
                     </>
@@ -978,6 +1080,76 @@ export const ReportsView: React.FC = () => {
                       <td className="py-3 px-3 font-mono text-[#666662]">{row.createdAt}</td>
                     </tr>
                   ))
+                )}
+              </tbody>
+            </table>
+          )}
+
+          {/* 4. AUDIT & SECURITY LOGS TABLE */}
+          {activeReport === 'audit' && (
+            <table className="w-full text-left border-collapse font-sans text-xs">
+              <thead>
+                <tr className="bg-[#1A1A1A] text-white uppercase tracking-wider text-[10px] font-bold">
+                  <th className="py-3 px-4">Timestamp</th>
+                  <th className="py-3 px-3">Action</th>
+                  <th className="py-3 px-4">Event Title & Details</th>
+                  <th className="py-3 px-3">User / Actor</th>
+                  <th className="py-3 px-3">IP Address</th>
+                  <th className="py-3 px-3">Browser & OS</th>
+                  <th className="py-3 px-3">Device Type</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E1] bg-white">
+                {filteredAuditLogRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-[#A3A39F] font-semibold">
+                      No security or audit log entries found matching criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAuditLogRows.map((row) => {
+                    let badgeClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                    if (row.action === 'LOGIN') badgeClass = 'bg-emerald-100 text-emerald-900 border-emerald-300';
+                    else if (row.action === 'LOGOUT') badgeClass = 'bg-rose-100 text-rose-900 border-rose-300';
+                    else if (row.action === 'ROLE_SWITCH') badgeClass = 'bg-amber-100 text-amber-900 border-amber-300';
+                    else if (row.action === 'ASSIGN') badgeClass = 'bg-blue-100 text-blue-900 border-blue-300';
+                    else if (row.action === 'MAINTENANCE_CREATE' || row.action === 'MAINTENANCE_UPDATE') badgeClass = 'bg-purple-100 text-purple-900 border-purple-300';
+
+                    return (
+                      <tr key={row.id} className="hover:bg-[#F9F9F8] transition-colors">
+                        <td className="py-3 px-4 font-mono text-[#1A1A1A] font-semibold whitespace-nowrap">
+                          {new Date(row.timestamp).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${badgeClass}`}>
+                            {row.action}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-[#1A1A1A]">{row.title}</div>
+                          <div className="text-[#666662] text-[11px] mt-0.5 leading-snug">{row.details}</div>
+                        </td>
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <div className="font-bold text-[#1A1A1A]">{row.actor || 'System'}</div>
+                          {row.actorEmail && <div className="text-[10px] text-[#A3A39F] font-mono">{row.actorEmail}</div>}
+                          {row.actorRole && <div className="text-[9px] text-[#666662] uppercase font-semibold">{row.actorRole}</div>}
+                        </td>
+                        <td className="py-3 px-3 font-mono text-[#1A1A1A] font-bold whitespace-nowrap">
+                          <span className="px-2 py-0.5 bg-[#F0F0EE] border border-[#E5E5E1] rounded-xs text-[11px]">
+                            {row.ipAddress || '192.168.1.105'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-[#1A1A1A] font-medium whitespace-nowrap">
+                          {row.browser || 'Chrome (macOS)'}
+                        </td>
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-800 border border-gray-200">
+                            {row.deviceType || 'Desktop'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

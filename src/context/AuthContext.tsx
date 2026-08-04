@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserProfile, UserRole, ModulePermissions, ModuleAccessLevel } from '../types';
 import { useProperty } from './PropertyContext';
+import { getFullClientMeta } from '../utils/deviceInfo';
 
 export interface LoginResult {
   success: boolean;
@@ -88,7 +89,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AUTH_USER_KEY = 'haharu_auth_user_id_v1';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { data, addUser } = useProperty();
+  const { data, addUser, writeLog } = useProperty();
   const [isRoleSelectorOpen, setIsRoleSelectorOpen] = useState(false);
 
   const usersList = data?.users || [];
@@ -137,16 +138,47 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(target);
       setIsAuthenticated(true);
       localStorage.setItem(AUTH_USER_KEY, target.id);
+
+      const meta = getFullClientMeta();
+      writeLog(
+        'ROLE_SWITCH',
+        'Switched User Account',
+        `Switched active session to ${target.name} (${target.email}) [Role: ${target.role}]`,
+        {
+          actor: target.name,
+          actorEmail: target.email,
+          actorRole: target.role,
+          ipAddress: meta.ipAddress,
+          browser: meta.browser,
+          deviceType: meta.deviceType,
+        }
+      );
     }
   };
 
   const switchRole = (role: UserRole) => {
     // Find an existing user with this role or create a temporary persona
     const found = usersList.find((u) => u.role === role);
+    const meta = getFullClientMeta();
+
     if (found) {
       setCurrentUser(found);
       setIsAuthenticated(true);
       localStorage.setItem(AUTH_USER_KEY, found.id);
+
+      writeLog(
+        'ROLE_SWITCH',
+        'Switched Role Persona',
+        `Switched active role persona to ${found.role} (${found.name})`,
+        {
+          actor: found.name,
+          actorEmail: found.email,
+          actorRole: found.role,
+          ipAddress: meta.ipAddress,
+          browser: meta.browser,
+          deviceType: meta.deviceType,
+        }
+      );
     } else {
       const tempUser: UserProfile = {
         id: `usr-${role.toLowerCase().replace(/[^a-z0-9]/g, '-')}-temp`,
@@ -158,6 +190,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(tempUser);
       setIsAuthenticated(true);
       localStorage.setItem(AUTH_USER_KEY, tempUser.id);
+
+      writeLog(
+        'ROLE_SWITCH',
+        'Switched Role Persona',
+        `Switched active role persona to ${tempUser.role} (${tempUser.name})`,
+        {
+          actor: tempUser.name,
+          actorEmail: tempUser.email,
+          actorRole: tempUser.role,
+          ipAddress: meta.ipAddress,
+          browser: meta.browser,
+          deviceType: meta.deviceType,
+        }
+      );
     }
   };
 
@@ -194,6 +240,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCurrentUser(found);
         setIsAuthenticated(true);
         localStorage.setItem(AUTH_USER_KEY, found.id);
+
+        const meta = getFullClientMeta();
+        writeLog(
+          'LOGIN',
+          'User Signed In',
+          `User ${found.name} (${found.email}) logged in successfully. IP: ${meta.ipAddress} • Device: ${meta.deviceType} • Browser: ${meta.browser}`,
+          {
+            actor: found.name,
+            actorEmail: found.email,
+            actorRole: found.role,
+            ipAddress: meta.ipAddress,
+            browser: meta.browser,
+            deviceType: meta.deviceType,
+          }
+        );
+
         return { success: true };
       } else {
         return { success: false, errorReason: 'invalid_password' };
@@ -226,6 +288,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(newAdmin);
       setIsAuthenticated(true);
       localStorage.setItem(AUTH_USER_KEY, newAdmin.id);
+
+      const meta = getFullClientMeta();
+      writeLog(
+        'LOGIN',
+        'User Signed In (Admin Provisioned)',
+        `Admin Asnaad (${newAdmin.email}) signed in. IP: ${meta.ipAddress} • Device: ${meta.deviceType} • Browser: ${meta.browser}`,
+        {
+          actor: newAdmin.name,
+          actorEmail: newAdmin.email,
+          actorRole: newAdmin.role,
+          ipAddress: meta.ipAddress,
+          browser: meta.browser,
+          deviceType: meta.deviceType,
+        }
+      );
+
       return { success: true };
     }
 
@@ -236,9 +314,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser(user);
     setIsAuthenticated(true);
     localStorage.setItem(AUTH_USER_KEY, user.id);
+
+    const meta = getFullClientMeta();
+    writeLog(
+      'LOGIN',
+      'User Signed In',
+      `User ${user.name} (${user.email}) signed in. IP: ${meta.ipAddress} • Device: ${meta.deviceType} • Browser: ${meta.browser}`,
+      {
+        actor: user.name,
+        actorEmail: user.email,
+        actorRole: user.role,
+        ipAddress: meta.ipAddress,
+        browser: meta.browser,
+        deviceType: meta.deviceType,
+      }
+    );
   };
 
   const logout = () => {
+    const meta = getFullClientMeta();
+    writeLog(
+      'LOGOUT',
+      'User Signed Out',
+      `User ${currentUser.name} (${currentUser.email || currentUser.role}) signed out of session. IP: ${meta.ipAddress} • Device: ${meta.deviceType}`,
+      {
+        actor: currentUser.name,
+        actorEmail: currentUser.email,
+        actorRole: currentUser.role,
+        ipAddress: meta.ipAddress,
+        browser: meta.browser,
+        deviceType: meta.deviceType,
+      }
+    );
+
     setIsAuthenticated(false);
     localStorage.removeItem(AUTH_USER_KEY);
   };

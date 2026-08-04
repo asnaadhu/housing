@@ -344,20 +344,61 @@ export const DashboardView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E1] mb-4">
               <h3 className="text-sm font-bold uppercase tracking-widest text-[#1A1A1A] flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#A3A39F]" />
-                <span>Audit Log</span>
+                <span>Audit & Security Logs</span>
               </h3>
+              {canAccessModule('reports') && (
+                <button
+                  onClick={() => setActiveTab('reports')}
+                  className="text-[10px] uppercase font-bold tracking-widest text-[#1A1A1A] hover:underline"
+                >
+                  View All
+                </button>
+              )}
             </div>
 
             <div className="space-y-4">
-              {data.logs.slice(0, 6).map((log) => (
-                <div key={log.id} className="pb-3 border-b border-[#F0F0EE] last:border-0 last:pb-0 text-xs">
-                  <div className="font-bold text-[#1A1A1A]">{log.title}</div>
-                  <div className="text-[#666662] mt-0.5 leading-snug">{log.details}</div>
-                  <div className="text-[10px] uppercase tracking-wider font-bold text-[#A3A39F] mt-1">
-                    {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {log.actor || 'System'}
+              {data.logs.slice(0, 6).map((log) => {
+                let badgeClass = 'bg-[#F0F0EE] text-[#1A1A1A] border-[#E5E5E1]';
+                if (log.action === 'LOGIN') badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+                else if (log.action === 'LOGOUT') badgeClass = 'bg-rose-50 text-rose-800 border-rose-200';
+                else if (log.action === 'ROLE_SWITCH') badgeClass = 'bg-amber-50 text-amber-800 border-amber-200';
+                else if (log.action === 'ASSIGN') badgeClass = 'bg-blue-50 text-blue-800 border-blue-200';
+
+                return (
+                  <div key={log.id} className="pb-3 border-b border-[#F0F0EE] last:border-0 last:pb-0 text-xs">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border rounded-xs ${badgeClass}`}>
+                        {log.action}
+                      </span>
+                      <span className="text-[10px] text-[#A3A39F] font-mono">
+                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <div className="font-bold text-[#1A1A1A]">{log.title}</div>
+                    <div className="text-[#666662] mt-0.5 leading-snug">{log.details}</div>
+
+                    <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[10px] text-[#A3A39F]">
+                      <span className="font-semibold text-[#1A1A1A]">{log.actor || 'System'}</span>
+                      {log.ipAddress && (
+                        <span className="bg-[#F0F0EE] px-1.5 py-0.5 text-[#666662] font-mono rounded-xs">
+                          IP: {log.ipAddress}
+                        </span>
+                      )}
+                      {log.browser && (
+                        <span className="bg-[#F0F0EE] px-1.5 py-0.5 text-[#666662] rounded-xs">
+                          {log.browser}
+                        </span>
+                      )}
+                      {log.deviceType && (
+                        <span className="bg-[#F0F0EE] px-1.5 py-0.5 text-[#666662] rounded-xs font-semibold">
+                          {log.deviceType}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

@@ -139,10 +139,27 @@ export interface MaintenanceRequest {
 export interface ActivityLog {
   id: string;
   timestamp: string;
-  action: 'ASSIGN' | 'CHECKOUT' | 'ROOM_CREATE' | 'ROOM_UPDATE' | 'STATUS_CHANGE' | 'SETTING_CHANGE' | 'MAINTENANCE_CREATE' | 'MAINTENANCE_UPDATE' | 'USER_CHANGE';
+  action:
+    | 'ASSIGN'
+    | 'CHECKOUT'
+    | 'ROOM_CREATE'
+    | 'ROOM_UPDATE'
+    | 'STATUS_CHANGE'
+    | 'SETTING_CHANGE'
+    | 'MAINTENANCE_CREATE'
+    | 'MAINTENANCE_UPDATE'
+    | 'USER_CHANGE'
+    | 'LOGIN'
+    | 'LOGOUT'
+    | 'ROLE_SWITCH';
   title: string;
   details: string;
   actor?: string;
+  actorEmail?: string;
+  actorRole?: string;
+  ipAddress?: string;
+  browser?: string;
+  deviceType?: string;
 }
 
 export interface PropertyData {
