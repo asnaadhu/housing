@@ -9,7 +9,7 @@ import { BedAssignmentsView } from './components/BedAssignmentsView';
 import { PropertySettingsView } from './components/PropertySettingsView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { UserManagementView } from './components/UserManagementView';
-import { TenantPortalView } from './components/TenantPortalView';
+import { ReportsView } from './components/ReportsView';
 import { LoginPage } from './components/LoginPage';
 
 const MainContent: React.FC = () => {
@@ -46,7 +46,7 @@ const MainContent: React.FC = () => {
           {activeTab === 'assignments' && <BedAssignmentsView />}
           {activeTab === 'maintenance' && <MaintenanceView />}
           {activeTab === 'users' && <UserManagementView />}
-          {activeTab === 'tenant-portal' && <TenantPortalView />}
+          {activeTab === 'reports' && <ReportsView />}
           {activeTab === 'settings' && <PropertySettingsView />}
         </main>
       </div>

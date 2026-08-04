@@ -90,9 +90,7 @@ export const RoleSwitcherModal: React.FC<RoleSwitcherModalProps> = ({ isOpen, on
       switchRole(role);
     }
 
-    if (role === 'Tenant') {
-      setActiveTab('tenant-portal');
-    } else if (role === 'Staff') {
+    if (role === 'Staff') {
       setActiveTab('maintenance');
     } else {
       setActiveTab('dashboard');

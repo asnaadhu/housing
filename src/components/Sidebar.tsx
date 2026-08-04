@@ -8,7 +8,7 @@ import {
   Settings,
   Wrench,
   Users,
-  User,
+  FileSpreadsheet,
   ShieldCheck,
 } from 'lucide-react';
 
@@ -33,14 +33,14 @@ export const Sidebar: React.FC = () => {
       label: 'Room Inventory',
       icon: Building2,
       badge: data.rooms.length.toString(),
-      show: currentUser.role !== 'Tenant',
+      show: true,
     },
     {
       id: 'assignments',
       label: 'Bed Assignments',
       icon: BedDouble,
       badge: data.beds.filter((b) => b.assignedTo != null).length.toString(),
-      show: currentUser.role !== 'Tenant',
+      show: true,
     },
     {
       id: 'maintenance',
@@ -50,11 +50,11 @@ export const Sidebar: React.FC = () => {
       show: true,
     },
     {
-      id: 'tenant-portal',
-      label: 'Resident Portal',
-      icon: User,
-      badge: 'Mine',
-      show: currentUser.role === 'Tenant' || currentUser.role === 'Admin',
+      id: 'reports',
+      label: 'Reports',
+      icon: FileSpreadsheet,
+      badge: 'PDF/XLS',
+      show: true,
     },
     {
       id: 'users',

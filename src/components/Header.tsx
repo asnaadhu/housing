@@ -30,9 +30,9 @@ export const Header: React.FC = () => {
       title: 'User Accounts & Access Control',
       subtitle: 'Manage user profiles, assign roles (Admin, Property Manager, Staff, Tenant).',
     },
-    'tenant-portal': {
-      title: 'Resident Housing Portal',
-      subtitle: 'View assigned room & bed, roommates, and report maintenance issues.',
+    reports: {
+      title: 'Reports',
+      subtitle: 'Generate and export occupancy, room capacity, bed roster, and maintenance reports in PDF, Excel, and CSV formats.',
     },
     settings: {
       title: 'Property Settings & Controls',

@@ -143,5 +143,5 @@ export interface PropertyData {
   maintenanceRequests: MaintenanceRequest[];
 }
 
-export type ActiveTab = 'dashboard' | 'inventory' | 'assignments' | 'maintenance' | 'users' | 'tenant-portal' | 'settings';
+export type ActiveTab = 'dashboard' | 'inventory' | 'assignments' | 'maintenance' | 'reports' | 'users' | 'settings';
 
