@@ -67,7 +67,19 @@ export interface Room {
   updatedAt: string;
 }
 
-export type UserRole = 'Admin' | 'Property Manager' | 'Staff' | 'Tenant';
+export type UserRole = 'Admin' | 'Property Manager' | 'Staff' | 'Tenant' | 'View Only (Dashboard & Reports)';
+
+export type ModuleAccessLevel = 'full' | 'view' | 'none';
+
+export interface ModulePermissions {
+  dashboard: ModuleAccessLevel;
+  inventory: ModuleAccessLevel;
+  assignments: ModuleAccessLevel;
+  maintenance: ModuleAccessLevel;
+  reports: ModuleAccessLevel;
+  users: ModuleAccessLevel;
+  settings: ModuleAccessLevel;
+}
 
 export interface UserProfile {
   id: string;
@@ -82,6 +94,7 @@ export interface UserProfile {
   phone?: string;
   avatarUrl?: string;
   createdAt?: string;
+  modulePermissions?: Partial<ModulePermissions>;
 }
 
 export type MaintenanceCategory =

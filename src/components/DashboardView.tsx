@@ -6,8 +6,6 @@ import {
   Clock,
   ArrowRight,
   ShieldCheck,
-  Layers,
-  PlusCircle,
   UserPlus,
 } from 'lucide-react';
 
@@ -64,7 +62,7 @@ export const DashboardView: React.FC = () => {
   });
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
+    <div className="p-0 sm:p-2 lg:p-6 space-y-6 sm:space-y-8 font-sans">
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Metric 1: Occupancy Rate */}
@@ -154,22 +152,6 @@ export const DashboardView: React.FC = () => {
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>Assign Resident</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('settings')}
-            className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
-          >
-            <PlusCircle className="w-3.5 h-3.5 text-[#666662]" />
-            <span>Property Settings</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('settings')}
-            className="flex-1 md:flex-none bg-[#F0F0EE] hover:bg-[#E5E5E1] text-[#1A1A1A] text-[11px] font-bold uppercase tracking-widest py-3 px-5 rounded-xs border border-[#E5E5E1] transition-colors flex items-center justify-center gap-2"
-          >
-            <Layers className="w-3.5 h-3.5 text-[#666662]" />
-            <span>Settings</span>
           </button>
         </div>
       </div>

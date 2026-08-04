@@ -1,11 +1,59 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserProfile, UserRole } from '../types';
+import { UserProfile, UserRole, ModulePermissions, ModuleAccessLevel } from '../types';
 import { useProperty } from './PropertyContext';
 
 export interface LoginResult {
   success: boolean;
   errorReason?: 'email_not_found' | 'invalid_password' | 'missing_fields';
 }
+
+export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
+  Admin: {
+    dashboard: 'full',
+    inventory: 'full',
+    assignments: 'full',
+    maintenance: 'full',
+    reports: 'full',
+    users: 'full',
+    settings: 'full',
+  },
+  'Property Manager': {
+    dashboard: 'full',
+    inventory: 'full',
+    assignments: 'full',
+    maintenance: 'full',
+    reports: 'full',
+    users: 'view',
+    settings: 'full',
+  },
+  Staff: {
+    dashboard: 'view',
+    inventory: 'view',
+    assignments: 'full',
+    maintenance: 'full',
+    reports: 'view',
+    users: 'none',
+    settings: 'none',
+  },
+  Tenant: {
+    dashboard: 'view',
+    inventory: 'none',
+    assignments: 'view',
+    maintenance: 'full',
+    reports: 'none',
+    users: 'none',
+    settings: 'none',
+  },
+  'View Only (Dashboard & Reports)': {
+    dashboard: 'view',
+    inventory: 'none',
+    assignments: 'none',
+    maintenance: 'none',
+    reports: 'view',
+    users: 'none',
+    settings: 'none',
+  },
+};
 
 interface AuthContextType {
   currentUser: UserProfile;
@@ -14,6 +62,9 @@ interface AuthContextType {
   switchRole: (role: UserRole) => void;
   switchUserById: (userId: string) => void;
   hasPermission: (permission: AuthPermission) => boolean;
+  getModulePermission: (moduleName: keyof ModulePermissions) => ModuleAccessLevel;
+  canAccessModule: (moduleName: keyof ModulePermissions) => boolean;
+  canEditModule: (moduleName: keyof ModulePermissions) => boolean;
   login: (email: string, password?: string) => LoginResult;
   loginUser: (user: UserProfile) => void;
   logout: () => void;
@@ -89,8 +140,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem(AUTH_USER_KEY, found.id);
     } else {
       const tempUser: UserProfile = {
-        id: `usr-${role.toLowerCase()}-temp`,
-        email: `${role.toLowerCase()}@haharu.com`,
+        id: `usr-${role.toLowerCase().replace(/[^a-z0-9]/g, '-')}-temp`,
+        email: `${role.toLowerCase().replace(/[^a-z0-9]/g, '-')}@haharu.com`,
         name: `Sample ${role}`,
         role: role,
         department: 'Operations',
@@ -98,6 +149,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(tempUser);
       setIsAuthenticated(true);
     }
+  };
+
+  const getModulePermission = (moduleName: keyof ModulePermissions): ModuleAccessLevel => {
+    if (currentUser.modulePermissions && currentUser.modulePermissions[moduleName] !== undefined) {
+      return currentUser.modulePermissions[moduleName]!;
+    }
+    const defaultMap = DEFAULT_ROLE_PERMISSIONS[currentUser.role] || DEFAULT_ROLE_PERMISSIONS['Staff'];
+    return defaultMap[moduleName] || 'none';
+  };
+
+  const canAccessModule = (moduleName: keyof ModulePermissions): boolean => {
+    const perm = getModulePermission(moduleName);
+    return perm === 'full' || perm === 'view';
+  };
+
+  const canEditModule = (moduleName: keyof ModulePermissions): boolean => {
+    const perm = getModulePermission(moduleName);
+    return perm === 'full';
   };
 
   const login = (email: string, password?: string): LoginResult => {
@@ -167,25 +236,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const hasPermission = (permission: AuthPermission): boolean => {
     const role = currentUser.role;
 
+    if (role === 'View Only (Dashboard & Reports)') {
+      if (permission === 'submit_maintenance') return false;
+      return false;
+    }
+
     switch (permission) {
       case 'manage_settings':
-        return role === 'Admin' || role === 'Property Manager';
+        return canEditModule('settings') || canEditModule('inventory');
       case 'edit_properties':
-        return role === 'Admin' || role === 'Property Manager';
+        return canEditModule('inventory');
       case 'delete_properties':
-        return role === 'Admin';
+        return role === 'Admin' && canEditModule('inventory');
       case 'assign_beds':
-        return role === 'Admin' || role === 'Property Manager';
+        return canEditModule('assignments');
       case 'update_bed_status':
-        return role === 'Admin' || role === 'Property Manager' || role === 'Staff';
+        return canEditModule('assignments') || canEditModule('inventory');
       case 'manage_maintenance':
-        return role === 'Admin' || role === 'Property Manager' || role === 'Staff';
+        return canEditModule('maintenance');
       case 'submit_maintenance':
-        return true; // Everyone can submit a maintenance request
+        return canAccessModule('maintenance');
       case 'manage_users':
-        return role === 'Admin';
+        return canEditModule('users');
       case 'view_all_properties':
-        return role === 'Admin' || role === 'Staff' || role === 'Property Manager';
+        return canAccessModule('inventory') || canAccessModule('assignments');
       default:
         return false;
     }
@@ -200,6 +274,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         switchRole,
         switchUserById,
         hasPermission,
+        getModulePermission,
+        canAccessModule,
+        canEditModule,
         login,
         loginUser,
         logout,

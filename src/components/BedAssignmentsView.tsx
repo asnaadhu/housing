@@ -85,7 +85,7 @@ export const BedAssignmentsView: React.FC = () => {
   const vacantBedsCount = data.beds.filter((b) => b.assignedTo == null && !data.statuses.find((s) => s.id === b.statusId)?.isMaintenanceState).length;
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
+    <div className="p-0 sm:p-2 lg:p-6 space-y-6 sm:space-y-8 font-sans">
       {/* Top Header & Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

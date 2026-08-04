@@ -72,6 +72,19 @@ const ROLE_PRESETS: {
     ],
     description: 'Resident assigned to Horizon Tower A, Room #101 Bed 1.',
   },
+  {
+    role: 'View Only (Dashboard & Reports)',
+    name: 'Auditor / Observer',
+    badge: 'View Only',
+    color: 'bg-amber-400 text-[#1A1A1A] border-amber-400',
+    permissions: [
+      'View Dashboard KPI analytics and occupancy metrics',
+      'View & export comprehensive operational Reports',
+      'Restricted from creating, editing, or deleting data',
+      'Restricted from Inventory, Assignments & Users',
+    ],
+    description: 'Read-only observer role for executive oversight and audit reporting.',
+  },
 ];
 
 export const RoleSwitcherModal: React.FC<RoleSwitcherModalProps> = ({ isOpen, onClose }) => {

@@ -32,20 +32,20 @@ const MainContent: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F9F9F8] text-[#1A1A1A] antialiased font-sans">
+    <div className="flex h-screen overflow-hidden bg-[#F9F9F8] text-[#1A1A1A] antialiased font-sans">
       {/* Side Navigation */}
       <Sidebar />
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         <Header />
 
-        <main className="flex-1 p-8 pb-12 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-12 max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && <DashboardView />}
-          {(activeTab === 'inventory' || activeTab === 'settings') && <PropertySettingsView />}
+          {(activeTab === 'inventory' || activeTab === 'settings') && <PropertySettingsView initialSubTab="buildings" />}
           {activeTab === 'assignments' && <BedAssignmentsView />}
           {activeTab === 'maintenance' && <MaintenanceView />}
-          {activeTab === 'users' && <UserManagementView />}
+          {activeTab === 'users' && <PropertySettingsView initialSubTab="users" />}
           {activeTab === 'reports' && <ReportsView />}
         </main>
       </div>

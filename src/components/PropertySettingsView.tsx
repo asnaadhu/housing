@@ -6,6 +6,7 @@ import { FloorModal } from './modals/FloorModal';
 import { RoomTypeModal } from './modals/RoomTypeModal';
 import { StatusModal } from './modals/StatusModal';
 import { RoomInventoryView } from './RoomInventoryView';
+import { UserManagementView } from './UserManagementView';
 import {
   Building2,
   Layers,
@@ -18,9 +19,12 @@ import {
   LayoutGrid,
   List,
   Home,
+  Users,
 } from 'lucide-react';
 
-export const PropertySettingsView: React.FC = () => {
+export const PropertySettingsView: React.FC<{
+  initialSubTab?: 'buildings' | 'rooms' | 'types' | 'statuses' | 'users';
+}> = ({ initialSubTab = 'buildings' }) => {
   const {
     data,
     deleteBuilding,
@@ -29,7 +33,21 @@ export const PropertySettingsView: React.FC = () => {
     deleteStatusCategory,
   } = useProperty();
 
-  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'rooms' | 'types' | 'statuses'>('buildings');
+  const [activeMainGroup, setActiveMainGroup] = useState<'property' | 'users'>(
+    initialSubTab === 'users' ? 'users' : 'property'
+  );
+  const [activeSubTab, setActiveSubTab] = useState<'buildings' | 'rooms' | 'types' | 'statuses' | 'users'>(initialSubTab);
+
+  React.useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+      if (initialSubTab === 'users') {
+        setActiveMainGroup('users');
+      } else {
+        setActiveMainGroup('property');
+      }
+    }
+  }, [initialSubTab]);
 
   // Building Modal State
   const [isBuildingModalOpen, setIsBuildingModalOpen] = useState<boolean>(false);
@@ -158,58 +176,132 @@ export const PropertySettingsView: React.FC = () => {
   };
 
   return (
-    <div className="p-10 max-w-7xl mx-auto space-y-8 font-sans">
-      {/* Sub-Tab Navigation Bar */}
-      <div className="bg-white p-2 border border-[#E5E5E1] shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="p-0 sm:p-2 lg:p-6 space-y-6 font-sans">
+      {/* Top Header & Main Category Grouping */}
+      <div className="bg-white p-4 sm:p-6 border border-[#E5E5E1] shadow-xs space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#E5E5E1]">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-[#A3A39F] mb-1">
+              System Administration
+            </div>
+            <h2 className="text-2xl font-bold text-[#1A1A1A]">Settings & Configuration</h2>
+          </div>
+          <div className="text-xs text-[#666662] max-w-sm font-medium">
+            Manage property architecture, room inventory, custom statuses, and user access control.
+          </div>
+        </div>
+
+        {/* Two Main Upper Headings / Group Selectors */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Main Heading 1: Property Settings */}
           <button
-            onClick={() => setActiveSubTab('buildings')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
-              activeSubTab === 'buildings'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
+            onClick={() => {
+              setActiveMainGroup('property');
+              if (activeSubTab === 'users') setActiveSubTab('buildings');
+            }}
+            className={`p-5 text-left border transition-all rounded-xs ${
+              activeMainGroup === 'property'
+                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-xs'
+                : 'bg-[#F9F9F8] text-[#1A1A1A] border-[#E5E5E1] hover:border-[#1A1A1A] hover:bg-white'
             }`}
           >
-            <Building2 className="w-4 h-4" />
-            <span>Buildings & Floors ({data.buildings.length})</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2.5">
+                <Building2 className={`w-5 h-5 ${activeMainGroup === 'property' ? 'text-white' : 'text-[#1A1A1A]'}`} />
+                <h3 className="text-sm font-bold uppercase tracking-wider">Property Settings</h3>
+              </div>
+              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-xs ${
+                activeMainGroup === 'property' ? 'bg-white/20 text-white' : 'bg-[#E5E5E1] text-[#1A1A1A]'
+              }`}>
+                4 Modules
+              </span>
+            </div>
+            <p className={`text-xs ${activeMainGroup === 'property' ? 'text-gray-300' : 'text-[#666662]'}`}>
+              Buildings & Floors, Room Inventory, Room Types, and Status Categories.
+            </p>
           </button>
 
+          {/* Main Heading 2: User Management */}
           <button
-            onClick={() => setActiveSubTab('rooms')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
-              activeSubTab === 'rooms'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
+            onClick={() => {
+              setActiveMainGroup('users');
+              setActiveSubTab('users');
+            }}
+            className={`p-5 text-left border transition-all rounded-xs ${
+              activeMainGroup === 'users'
+                ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-xs'
+                : 'bg-[#F9F9F8] text-[#1A1A1A] border-[#E5E5E1] hover:border-[#1A1A1A] hover:bg-white'
             }`}
           >
-            <Home className="w-4 h-4" />
-            <span>Room Inventory ({data.rooms.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('types')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
-              activeSubTab === 'types'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
-            }`}
-          >
-            <Tag className="w-4 h-4" />
-            <span>Room Types & Defaults ({data.roomTypes.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('statuses')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
-              activeSubTab === 'statuses'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:text-[#1A1A1A] hover:bg-[#F0F0EE]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Status Categories ({data.statuses.length})</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2.5">
+                <Users className={`w-5 h-5 ${activeMainGroup === 'users' ? 'text-white' : 'text-[#1A1A1A]'}`} />
+                <h3 className="text-sm font-bold uppercase tracking-wider">User Management</h3>
+              </div>
+              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-xs ${
+                activeMainGroup === 'users' ? 'bg-white/20 text-white' : 'bg-[#E5E5E1] text-[#1A1A1A]'
+              }`}>
+                {(data.users || []).length} Accounts
+              </span>
+            </div>
+            <p className={`text-xs ${activeMainGroup === 'users' ? 'text-gray-300' : 'text-[#666662]'}`}>
+              Manage user profiles, roles (Admin, Property Manager, Staff, Tenant), and access rights.
+            </p>
           </button>
         </div>
+
+        {/* Sub-Tab Navigation Bar when Property Settings is selected */}
+        {activeMainGroup === 'property' && (
+          <div className="pt-3 border-t border-[#E5E5E1] flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setActiveSubTab('buildings')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
+                activeSubTab === 'buildings'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  : 'bg-[#F9F9F8] text-[#666662] hover:text-[#1A1A1A] hover:bg-[#E5E5E1]'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              <span>Buildings & Floors ({data.buildings.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab('rooms')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
+                activeSubTab === 'rooms'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  : 'bg-[#F9F9F8] text-[#666662] hover:text-[#1A1A1A] hover:bg-[#E5E5E1]'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              <span>Room Inventory ({data.rooms.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab('types')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
+                activeSubTab === 'types'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  : 'bg-[#F9F9F8] text-[#666662] hover:text-[#1A1A1A] hover:bg-[#E5E5E1]'
+              }`}
+            >
+              <Tag className="w-4 h-4" />
+              <span>Room Types & Defaults ({data.roomTypes.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab('statuses')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-xs font-bold uppercase tracking-wider transition-colors ${
+                activeSubTab === 'statuses'
+                  ? 'bg-[#1A1A1A] text-white shadow-xs'
+                  : 'bg-[#F9F9F8] text-[#666662] hover:text-[#1A1A1A] hover:bg-[#E5E5E1]'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              <span>Status Categories ({data.statuses.length})</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* SUB-TAB 1: BUILDINGS & FLOORS */}
@@ -523,6 +615,11 @@ export const PropertySettingsView: React.FC = () => {
             })}
           </div>
         </div>
+      )}
+
+      {/* SUB-TAB 5: USER ACCOUNTS & PERMISSIONS */}
+      {activeSubTab === 'users' && (
+        <UserManagementView embedded={true} />
       )}
 
       {/* CRUD Modals */}

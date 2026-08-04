@@ -35,6 +35,9 @@ interface PropertyContextType {
   isLoading: boolean;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+  toggleMobileMenu: () => void;
 
   // Building Actions
   addBuilding: (name: string, code: string, description?: string) => Promise<void>;
@@ -265,7 +268,17 @@ export const PropertyProvider: React.FC<{ children: ReactNode }> = ({ children }
     maintenanceRequests: [],
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTabState] = useState<string>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    setIsMobileMenuOpen(false);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen((prev) => !prev);
+  };
 
   // Verify connection on startup & clear legacy sample data
   useEffect(() => {
@@ -1115,6 +1128,9 @@ export const PropertyProvider: React.FC<{ children: ReactNode }> = ({ children }
         isLoading,
         activeTab,
         setActiveTab,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
+        toggleMobileMenu,
 
         addBuilding,
         updateBuilding,

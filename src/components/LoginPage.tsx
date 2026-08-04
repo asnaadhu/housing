@@ -49,14 +49,14 @@ export const LoginPage: React.FC = () => {
       <header className="bg-[#1A1A1A] text-white border-b border-[#333330] py-4 px-6 md:px-12 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-white text-[#1A1A1A] flex items-center justify-center font-bold text-lg font-mono tracking-tighter">
-            AH
+            HM
           </div>
           <div>
             <h1 className="font-bold text-lg leading-none tracking-tight">
-              Apex Housing Management
+              Haharu Housing Management
             </h1>
             <p className="text-[10px] text-[#A3A39F] font-mono uppercase tracking-widest mt-0.5">
-              Enterprise Property & Accommodation System
+              Avani+ Fares maldives Resort
             </p>
           </div>
         </div>

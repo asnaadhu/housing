@@ -20,7 +20,7 @@ import {
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-type ReportType = 'occupancy' | 'inventory' | 'maintenance' | 'directory';
+type ReportType = 'occupancy' | 'inventory' | 'maintenance';
 
 export const ReportsView: React.FC = () => {
   const { data } = useProperty();
@@ -184,22 +184,6 @@ export const ReportsView: React.FC = () => {
       });
   }, [data, selectedBuildingId, selectedStatus, searchQuery]);
 
-  // Filtered Occupant & Directory Rows
-  const filteredDirectoryRows = useMemo(() => {
-    return data.users.filter((user) => {
-      if (selectedDepartment !== 'all' && user.department !== selectedDepartment) return false;
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = user.name.toLowerCase().includes(q);
-        const matchEmail = user.email.toLowerCase().includes(q);
-        const matchEmp = (user.employeeId || '').toLowerCase().includes(q);
-        const matchDept = (user.department || '').toLowerCase().includes(q);
-        if (!matchName && !matchEmail && !matchEmp && !matchDept) return false;
-      }
-      return true;
-    });
-  }, [data.users, selectedDepartment, searchQuery]);
-
   // Reset all filters
   const handleResetFilters = () => {
     setSelectedBuildingId('all');
@@ -288,17 +272,6 @@ export const ReportsView: React.FC = () => {
         r.assignedTechnician,
         r.createdAt,
         r.completedAt,
-      ]);
-    } else {
-      headers = ['Name', 'Email', 'Role', 'Employee ID', 'Department', 'Phone', 'Created Date'];
-      rows = filteredDirectoryRows.map((u) => [
-        u.name,
-        u.email,
-        u.role,
-        u.employeeId || '-',
-        u.department || '-',
-        u.phone || '-',
-        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-',
       ]);
     }
 
@@ -402,18 +375,6 @@ export const ReportsView: React.FC = () => {
         r.createdAt,
         r.completedAt,
       ]);
-    } else {
-      title = 'Staff & Occupant Directory Master Report';
-      headers = ['Full Name', 'Email Address', 'System Role', 'Employee ID', 'Department', 'Phone Number', 'Registered Date'];
-      rows = filteredDirectoryRows.map((u) => [
-        u.name,
-        u.email,
-        u.role,
-        u.employeeId || '-',
-        u.department || '-',
-        u.phone || '-',
-        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-',
-      ]);
     }
 
     const excelTemplate = `
@@ -491,7 +452,6 @@ export const ReportsView: React.FC = () => {
     let titleText = 'Occupancy & Bed Assignment Roster';
     if (activeReport === 'inventory') titleText = 'Room & Building Inventory Capacity Summary';
     if (activeReport === 'maintenance') titleText = 'Property Maintenance & Incident Log Report';
-    if (activeReport === 'directory') titleText = 'User Directory & Occupant Directory';
 
     doc.text(titleText, 14, 22);
 
@@ -559,17 +519,6 @@ export const ReportsView: React.FC = () => {
         r.requesterName,
         r.assignedTechnician,
         r.createdAt,
-      ]);
-    } else {
-      head = [['Full Name', 'Email Address', 'Role', 'Employee ID', 'Department', 'Phone', 'Created Date']];
-      body = filteredDirectoryRows.map((u) => [
-        u.name,
-        u.email,
-        u.role,
-        u.employeeId || '-',
-        u.department || '-',
-        u.phone || '-',
-        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-',
       ]);
     }
 
@@ -699,18 +648,6 @@ export const ReportsView: React.FC = () => {
             <Wrench className="w-4 h-4" />
             <span>Maintenance & Tickets</span>
           </button>
-
-          <button
-            onClick={() => setActiveReport('directory')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-              activeReport === 'directory'
-                ? 'bg-[#1A1A1A] text-white shadow-xs'
-                : 'text-[#666662] hover:bg-[#E5E5E1] hover:text-[#1A1A1A]'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>User & Staff Directory</span>
-          </button>
         </div>
 
         {/* Filter Toolbar */}
@@ -744,8 +681,8 @@ export const ReportsView: React.FC = () => {
               </select>
             </div>
 
-            {/* Department Filter (for occupancy & directory) */}
-            {(activeReport === 'occupancy' || activeReport === 'directory') && (
+            {/* Department Filter (for occupancy) */}
+            {activeReport === 'occupancy' && (
               <div className="w-44">
                 <select
                   value={selectedDepartment}
@@ -837,7 +774,6 @@ export const ReportsView: React.FC = () => {
                 {activeReport === 'occupancy' && filteredOccupancyRows.length}
                 {activeReport === 'inventory' && filteredInventoryRows.length}
                 {activeReport === 'maintenance' && filteredMaintenanceRows.length}
-                {activeReport === 'directory' && filteredDirectoryRows.length}
               </strong>
             </span>
           </div>
@@ -1034,50 +970,6 @@ export const ReportsView: React.FC = () => {
                       <td className="py-3 px-3 text-[#1A1A1A]">{row.requesterName}</td>
                       <td className="py-3 px-3 text-[#666662]">{row.assignedTechnician}</td>
                       <td className="py-3 px-3 font-mono text-[#666662]">{row.createdAt}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
-
-          {/* 4. USER DIRECTORY REPORT TABLE */}
-          {activeReport === 'directory' && (
-            <table className="w-full text-left border-collapse font-sans text-xs">
-              <thead>
-                <tr className="bg-[#1A1A1A] text-white uppercase tracking-wider text-[10px] font-bold">
-                  <th className="py-3 px-4">Full Name</th>
-                  <th className="py-3 px-4">Email Address</th>
-                  <th className="py-3 px-3">Role</th>
-                  <th className="py-3 px-3">Employee ID</th>
-                  <th className="py-3 px-3">Department</th>
-                  <th className="py-3 px-3">Phone</th>
-                  <th className="py-3 px-3">Registered Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E5E1] bg-white">
-                {filteredDirectoryRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-[#A3A39F] font-semibold">
-                      No user accounts found matching directory filters.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredDirectoryRows.map((user) => (
-                    <tr key={user.id} className="hover:bg-[#F9F9F8] transition-colors">
-                      <td className="py-3 px-4 font-bold text-[#1A1A1A]">{user.name}</td>
-                      <td className="py-3 px-4 font-medium text-[#1A1A1A]">{user.email}</td>
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#1A1A1A] text-white">
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 font-mono text-[#666662]">{user.employeeId || '-'}</td>
-                      <td className="py-3 px-3 text-[#1A1A1A]">{user.department || '-'}</td>
-                      <td className="py-3 px-3 text-[#666662]">{user.phone || '-'}</td>
-                      <td className="py-3 px-3 font-mono text-[#666662]">
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
-                      </td>
                     </tr>
                   ))
                 )}

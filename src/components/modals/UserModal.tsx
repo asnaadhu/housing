@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useProperty } from '../../context/PropertyContext';
-import { UserProfile, UserRole } from '../../types';
-import { UserPlus, X, Save, Shield, Building, BedDouble, Mail, Phone, KeyRound } from 'lucide-react';
+import { UserProfile, UserRole, ModulePermissions, ModuleAccessLevel } from '../../types';
+import { DEFAULT_ROLE_PERMISSIONS } from '../../context/AuthContext';
+import { UserPlus, X, Save, Shield, Building, BedDouble, Mail, Phone, KeyRound, Lock, Eye, CheckCircle } from 'lucide-react';
 
 interface UserModalProps {
   isOpen: boolean;
@@ -11,9 +12,20 @@ interface UserModalProps {
 
 const ROLES: { label: string; value: UserRole; desc: string }[] = [
   { label: 'Admin', value: 'Admin', desc: 'Full system control across all properties and settings' },
-  { label: 'Property Manager', value: 'Property Manager', desc: 'Property Settings, Inventory, Dashboard & Bed Assignments for assigned properties' },
-  { label: 'Staff', value: 'Staff', desc: 'Limited access to view assignments, update bed statuses & maintenance tickets' },
+  { label: 'Property Manager', value: 'Property Manager', desc: 'Property Settings, Inventory, Dashboard & Bed Assignments' },
+  { label: 'Staff', value: 'Staff', desc: 'Access to view assignments, update bed statuses & maintenance tickets' },
   { label: 'Tenant', value: 'Tenant', desc: 'Resident portal view to track bed assignment & submit maintenance' },
+  { label: 'View Only (Dashboard & Reports)', value: 'View Only (Dashboard & Reports)', desc: 'Restricted read-only access limited strictly to Dashboard & Reports' },
+];
+
+const MODULE_KEYS: { id: keyof ModulePermissions; label: string; desc: string }[] = [
+  { id: 'dashboard', label: 'Dashboard Module', desc: 'Overview metrics & property stats' },
+  { id: 'inventory', label: 'Inventory & Buildings', desc: 'Buildings, floors, room types & status setups' },
+  { id: 'assignments', label: 'Bed Assignments', desc: 'Member occupant check-ins & bed rosters' },
+  { id: 'maintenance', label: 'Maintenance & Tickets', desc: 'Incident reporting & work orders' },
+  { id: 'reports', label: 'Reports & Export', desc: 'Occupancy logs & analytics downloads' },
+  { id: 'users', label: 'User Management', desc: 'Account roles, credentials & access permissions' },
+  { id: 'settings', label: 'System Settings', desc: 'Global configuration & master attributes' },
 ];
 
 export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdit }) => {
@@ -28,6 +40,10 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
   const [phone, setPhone] = useState('');
   const [assignedBuildingIds, setAssignedBuildingIds] = useState<string[]>([]);
   const [assignedBedId, setAssignedBedId] = useState('');
+  const [customPermissions, setCustomPermissions] = useState<ModulePermissions>(
+    DEFAULT_ROLE_PERMISSIONS['Staff']
+  );
+  const [showCustomPermissions, setShowCustomPermissions] = useState(false);
 
   useEffect(() => {
     if (userToEdit && isOpen) {
@@ -40,6 +56,10 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
       setPhone(userToEdit.phone || '');
       setAssignedBuildingIds(userToEdit.assignedBuildingIds || []);
       setAssignedBedId(userToEdit.assignedBedId || '');
+
+      const basePerms = DEFAULT_ROLE_PERMISSIONS[userToEdit.role] || DEFAULT_ROLE_PERMISSIONS['Staff'];
+      setCustomPermissions({ ...basePerms, ...(userToEdit.modulePermissions || {}) });
+      setShowCustomPermissions(!!userToEdit.modulePermissions);
     } else if (isOpen) {
       setName('');
       setEmail('');
@@ -50,10 +70,24 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
       setPhone('');
       setAssignedBuildingIds([]);
       setAssignedBedId('');
+      setCustomPermissions(DEFAULT_ROLE_PERMISSIONS['Staff']);
+      setShowCustomPermissions(false);
     }
   }, [userToEdit, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleRoleChange = (newRole: UserRole) => {
+    setRole(newRole);
+    setCustomPermissions(DEFAULT_ROLE_PERMISSIONS[newRole] || DEFAULT_ROLE_PERMISSIONS['Staff']);
+  };
+
+  const handleModulePermChange = (moduleKey: keyof ModulePermissions, level: ModuleAccessLevel) => {
+    setCustomPermissions((prev) => ({
+      ...prev,
+      [moduleKey]: level,
+    }));
+  };
 
   const handleBuildingToggle = (bId: string) => {
     if (assignedBuildingIds.includes(bId)) {
@@ -69,30 +103,23 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
 
     const cleanPassword = password.trim() || '123456';
 
+    const payload = {
+      name: name.trim(),
+      email: email.trim(),
+      password: cleanPassword,
+      role,
+      ...(employeeId.trim() ? { employeeId: employeeId.trim() } : {}),
+      ...(department.trim() ? { department: department.trim() } : {}),
+      ...(phone.trim() ? { phone: phone.trim() } : {}),
+      ...(role === 'Property Manager' && assignedBuildingIds.length > 0 ? { assignedBuildingIds } : {}),
+      ...(role === 'Tenant' && assignedBedId ? { assignedBedId } : {}),
+      modulePermissions: showCustomPermissions ? customPermissions : DEFAULT_ROLE_PERMISSIONS[role],
+    };
+
     if (userToEdit) {
-      updateUser(userToEdit.id, {
-        name: name.trim(),
-        email: email.trim(),
-        password: cleanPassword,
-        role,
-        ...(employeeId.trim() ? { employeeId: employeeId.trim() } : {}),
-        ...(department.trim() ? { department: department.trim() } : {}),
-        ...(phone.trim() ? { phone: phone.trim() } : {}),
-        ...(role === 'Property Manager' && assignedBuildingIds.length > 0 ? { assignedBuildingIds } : {}),
-        ...(role === 'Tenant' && assignedBedId ? { assignedBedId } : {}),
-      });
+      updateUser(userToEdit.id, payload);
     } else {
-      addUser({
-        name: name.trim(),
-        email: email.trim(),
-        password: cleanPassword,
-        role,
-        ...(employeeId.trim() ? { employeeId: employeeId.trim() } : {}),
-        ...(department.trim() ? { department: department.trim() } : {}),
-        ...(phone.trim() ? { phone: phone.trim() } : {}),
-        ...(role === 'Property Manager' && assignedBuildingIds.length > 0 ? { assignedBuildingIds } : {}),
-        ...(role === 'Tenant' && assignedBedId ? { assignedBedId } : {}),
-      });
+      addUser(payload);
     }
 
     onClose();
@@ -100,7 +127,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
 
   return (
     <div className="fixed inset-0 z-50 bg-[#1A1A1A]/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
-      <div className="bg-white max-w-md w-full shadow-2xl overflow-hidden border border-[#E5E5E1] animate-in fade-in zoom-in duration-150 my-8 max-h-[90vh] flex flex-col">
+      <div className="bg-white max-w-lg w-full shadow-2xl overflow-hidden border border-[#E5E5E1] animate-in fade-in zoom-in duration-150 my-8 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="px-6 py-5 bg-[#1A1A1A] text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
@@ -168,11 +195,11 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
           <div>
             <label className="block text-[10px] font-bold text-[#A3A39F] uppercase tracking-widest mb-1.5 flex items-center gap-1">
               <Shield className="w-3 h-3 text-[#1A1A1A]" />
-              <span>Assigned Role & Authorization *</span>
+              <span>Assigned System Role *</span>
             </label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
+              onChange={(e) => handleRoleChange(e.target.value as UserRole)}
               className="w-full px-3 py-2 border border-[#E5E5E1] text-[#1A1A1A] text-xs font-bold focus:outline-none focus:border-[#1A1A1A] bg-white"
             >
               {ROLES.map((r) => (
@@ -181,6 +208,81 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userToEdi
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Module-based Permissions Customization toggle */}
+          <div className="bg-[#F9F9F8] p-3.5 border border-[#E5E5E1] space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A] block">
+                  Module-Level Granular Permissions
+                </span>
+                <span className="text-[10px] text-[#A3A39F]">
+                  Configure per-module access rights (Full Access, View Only, No Access)
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCustomPermissions(!showCustomPermissions)}
+                className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-white border border-[#E5E5E1] hover:bg-[#F0F0EE] text-[#1A1A1A]"
+              >
+                {showCustomPermissions ? 'Use Default Role Rights' : 'Customize Modules'}
+              </button>
+            </div>
+
+            {/* Matrix Table */}
+            <div className="space-y-2 pt-2 border-t border-[#E5E5E1]">
+              {MODULE_KEYS.map((mod) => {
+                const currentLevel = (showCustomPermissions ? customPermissions : (DEFAULT_ROLE_PERMISSIONS[role] || DEFAULT_ROLE_PERMISSIONS['Staff']))[mod.id];
+                return (
+                  <div key={mod.id} className="flex items-center justify-between gap-2 p-2 bg-white border border-[#E5E5E1] text-xs">
+                    <div>
+                      <div className="font-bold text-[#1A1A1A] text-[11px]">{mod.label}</div>
+                      <div className="text-[9px] text-[#A3A39F]">{mod.desc}</div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={!showCustomPermissions}
+                        onClick={() => handleModulePermChange(mod.id, 'full')}
+                        className={`px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-xs transition-colors ${
+                          currentLevel === 'full'
+                            ? 'bg-[#1A1A1A] text-white font-bold'
+                            : 'bg-[#F0F0EE] text-[#666662] hover:bg-[#E5E5E1]'
+                        } ${!showCustomPermissions && 'opacity-80 cursor-default'}`}
+                      >
+                        Full
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!showCustomPermissions}
+                        onClick={() => handleModulePermChange(mod.id, 'view')}
+                        className={`px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-xs transition-colors ${
+                          currentLevel === 'view'
+                            ? 'bg-amber-400 text-[#1A1A1A] font-bold'
+                            : 'bg-[#F0F0EE] text-[#666662] hover:bg-[#E5E5E1]'
+                        } ${!showCustomPermissions && 'opacity-80 cursor-default'}`}
+                      >
+                        View Only
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!showCustomPermissions}
+                        onClick={() => handleModulePermChange(mod.id, 'none')}
+                        className={`px-2 py-1 text-[9px] font-bold uppercase tracking-wider rounded-xs transition-colors ${
+                          currentLevel === 'none'
+                            ? 'bg-rose-100 text-rose-800 font-bold border border-rose-300'
+                            : 'bg-[#F0F0EE] text-[#666662] hover:bg-[#E5E5E1]'
+                        } ${!showCustomPermissions && 'opacity-80 cursor-default'}`}
+                      >
+                        No Access
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Department & Employee ID */}
