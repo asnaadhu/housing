@@ -10,6 +10,7 @@ import { PropertySettingsView } from './components/PropertySettingsView';
 import { MaintenanceView } from './components/MaintenanceView';
 import { UserManagementView } from './components/UserManagementView';
 import { ReportsView } from './components/ReportsView';
+import { PropertyAvailabilityView } from './components/PropertyAvailabilityView';
 import { LoginPage } from './components/LoginPage';
 
 const MainContent: React.FC = () => {
@@ -23,6 +24,8 @@ const MainContent: React.FC = () => {
     let isTabAllowed = true;
     if (activeTab === 'dashboard') {
       isTabAllowed = canAccessModule('dashboard');
+    } else if (activeTab === 'availability') {
+      isTabAllowed = canAccessModule('availability');
     } else if (activeTab === 'inventory') {
       isTabAllowed = canAccessModule('inventory') || canAccessModule('settings');
     } else if (activeTab === 'assignments') {
@@ -72,6 +75,7 @@ const MainContent: React.FC = () => {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-12 max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && <DashboardView />}
+          {activeTab === 'availability' && <PropertyAvailabilityView />}
           {(activeTab === 'inventory' || activeTab === 'settings') && <PropertySettingsView initialSubTab="buildings" />}
           {activeTab === 'assignments' && <BedAssignmentsView />}
           {activeTab === 'maintenance' && <MaintenanceView />}

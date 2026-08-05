@@ -30,6 +30,13 @@ export const Sidebar: React.FC = () => {
       show: canAccessModule('dashboard'),
     },
     {
+      id: 'availability',
+      label: 'Property Availability',
+      icon: Building2,
+      badge: null,
+      show: canAccessModule('availability'),
+    },
+    {
       id: 'assignments',
       label: 'Bed Assignments',
       icon: BedDouble,

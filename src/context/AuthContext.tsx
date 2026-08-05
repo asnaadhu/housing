@@ -11,6 +11,7 @@ export interface LoginResult {
 export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   Admin: {
     dashboard: 'full',
+    availability: 'full',
     inventory: 'full',
     assignments: 'full',
     maintenance: 'full',
@@ -20,6 +21,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   },
   'Property Manager': {
     dashboard: 'full',
+    availability: 'full',
     inventory: 'full',
     assignments: 'full',
     maintenance: 'full',
@@ -29,6 +31,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   },
   Staff: {
     dashboard: 'view',
+    availability: 'full',
     inventory: 'view',
     assignments: 'full',
     maintenance: 'full',
@@ -38,6 +41,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   },
   Tenant: {
     dashboard: 'view',
+    availability: 'view',
     inventory: 'none',
     assignments: 'view',
     maintenance: 'full',
@@ -47,6 +51,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   },
   'View Only (Dashboard & Reports)': {
     dashboard: 'view',
+    availability: 'view',
     inventory: 'none',
     assignments: 'none',
     maintenance: 'none',

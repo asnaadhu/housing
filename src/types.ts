@@ -74,6 +74,7 @@ export type ModuleAccessLevel = 'full' | 'view' | 'none';
 
 export interface ModulePermissions {
   dashboard: ModuleAccessLevel;
+  availability?: ModuleAccessLevel;
   inventory: ModuleAccessLevel;
   assignments: ModuleAccessLevel;
   maintenance: ModuleAccessLevel;
@@ -174,5 +175,13 @@ export interface PropertyData {
   maintenanceRequests: MaintenanceRequest[];
 }
 
-export type ActiveTab = 'dashboard' | 'inventory' | 'assignments' | 'maintenance' | 'reports' | 'users' | 'settings';
+export type ActiveTab =
+  | 'dashboard'
+  | 'availability'
+  | 'inventory'
+  | 'assignments'
+  | 'maintenance'
+  | 'reports'
+  | 'users'
+  | 'settings';
 
